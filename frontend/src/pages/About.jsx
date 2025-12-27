@@ -7,9 +7,13 @@ export default function About() {
   return (
     <div className="bg-white rounded shadow-sm p-4" style={{ maxWidth: "800px", margin: "0 auto" }}>
       {/* Top Logo and Title */}
-      <div className="d-flex align-items-center mb-4">
+      <div className="d-flex align-items-center justify-content-between mb-4">
         {/* <img src={dvgnLogo} alt="DVGN Logo" style={{ height: "50px", marginRight: "15px" }} /> */}
-        <h4 className="mb-0">Division Vehicle Management System</h4>
+        <h4 className="mb-0">Division Vehicle Management System</h4><section className="d-flex gap-3 mt-3">
+        <img src={divisionLogo} alt="Division Logo" style={{ height: "50px" }} />
+        {/* <img src={brigadeLogo} alt="Brigade Logo" style={{ height: "50px" }} /> */}
+        <img src={unitLogo} alt="Unit Logo" style={{ height: "50px" }} />
+      </section>
       </div>
 
       {/* About the VMS */}
@@ -44,18 +48,14 @@ export default function About() {
           and testing of the VMS.
         </p>
         <ul>
-          <li>Lead Developer: ARSLAN MAZHAR</li>
-          <li>Software Engineers: Team Member 2, Team Member 3</li>
-          <li>Field Consultants: Unit Experts</li>
+          <li> MAJ MEHR</li>
+          <li> CAPT ARSLAN</li>
+          <li> CAPT JAVERIA</li>
         </ul>
       </section>
 
       {/* Formation / Division Logos */}
-      <section className="d-flex gap-3 mt-3">
-        <img src={divisionLogo} alt="Division Logo" style={{ height: "50px" }} />
-        {/* <img src={brigadeLogo} alt="Brigade Logo" style={{ height: "50px" }} /> */}
-        <img src={unitLogo} alt="Unit Logo" style={{ height: "50px" }} />
-      </section>
+      
     </div>
   );
 }

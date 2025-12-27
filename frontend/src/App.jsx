@@ -5,8 +5,10 @@ import Dashboard from "./pages/Dashboard";
 import Vehicles from "./pages/Vehicles";
 import Settings from "./pages/Settings";
 import About from "./pages/About";
+import Home from "./pages/Home";
 
 
+import './index.css'; 
 export default function App() {
   const [page, setPage] = useState("dashboard");
 
@@ -18,13 +20,15 @@ export default function App() {
         return <Settings />;
         case "about":
         return <About />;
+        case "home":
+        return<Home/>;
       default:
         return <Dashboard />;
     }
   }
 
   return (
-    <div className="d-flex" style={{ height: "100vh", background: "#ebeaeaff" }}>
+    <div className="d-flex" style={{ height: "100vh", background: "#f4f7f3ff" }}>
       <Sidebar active={page} setActive={setPage} />
 
       <div className="flex-grow-1 d-flex flex-column">
