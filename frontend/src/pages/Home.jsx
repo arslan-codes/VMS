@@ -1,13 +1,16 @@
 import { 
-  FaCogs,        // EME
-  FaBullseye,    // Artillery
-  FaSignal,      // Signals
-  FaUsers,       // Infantry / general
-  FaTruck,       // Logistics / Ordnance
-  FaGlobe        // Global operations / SNT
+  FaCogs, FaBullseye, FaSignal, FaUsers, FaTruck, FaGlobe, FaFileAlt 
 } from "react-icons/fa";
 
 export default function Home() {
+  const units = [
+    { title: "Artillery", icon: <FaBullseye />, color: "#dc2626", desc: "Long-range support assets." },
+    { title: "EME", icon: <FaCogs />, color: "#2563eb", desc: "Technical maintenance & recovery." },
+    { title: "Signals", icon: <FaSignal />, color: "#059669", desc: "Secure comms & network nodes." },
+    { title: "Infantry", icon: <FaUsers />, color: "#d97706", desc: "Transport & troop movement." },
+    { title: "Ordnance", icon: <FaTruck />, color: "#475569", desc: "Logistics and supply chain." },
+    { title: "SNT", icon: <FaGlobe />, color: "#0891b2", desc: "Special tactical deployments." }
+  ];
   return (
   <div className="bg-white rounded shadow-sm p-4" style={{ maxWidth: "1000px", margin: "0 auto" }}>
 
@@ -16,171 +19,81 @@ export default function Home() {
         <h2 className="fw-bold slide-in">Welcome to 34 DIV VMS</h2>
         <p className="text-muted">Military Vehicle Management System overview</p>
       </div>
-
-      {/* Vehicle Type Cards */}
-      <div className="row mb-4">
-        <div className="col-md-4 mb-3 fade-in">
-          <div className="card shadow-sm h-100 text-center">
-            <div className="card-body">
-              <FaBullseye size={40} className="mb-2 text-danger" />
-              <h5 className="card-title">Artillery</h5>
-              <p className="card-text">
-                Heavy artillery vehicles for long-range support and firepower deployment.
-              </p>
+ <div className="row g-3 mb-4">
+        {units.map((u, i) => (
+          <div key={i} className="col-md-4 col-xl-2"> {/* Responsive: 6 cards per row on large screens */}
+            <div className="card h-100 border-0 shadow-sm" style={{ 
+              borderTop: `4px solid ${u.color}`, 
+              borderRadius: '0',
+              backgroundColor: '#ffffff' 
+            }}>
+              <div className="card-body text-center p-3">
+                <div style={{ color: u.color, fontSize: '28px' }} className="mb-2">
+                  {u.icon}
+                </div>
+                <h6 className="fw-bold text-uppercase mb-1" style={{ fontSize: '12px' }}>{u.title}</h6>
+                <p className="text-muted mb-0" style={{ fontSize: '11px', lineHeight: '1.3' }}>{u.desc}</p>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="col-md-4 mb-3 fade-in delay-1">
-          <div className="card shadow-sm h-100 text-center">
-            <div className="card-body">
-              <FaCogs size={40} className="mb-2 text-primary" />
-              <h5 className="card-title">EME</h5>
-              <p className="card-text">
-                Engineering Maintenance Vehicles ensuring technical support and repairs.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-4 mb-3 fade-in delay-2">
-          <div className="card shadow-sm h-100 text-center">
-            <div className="card-body">
-              <FaSignal size={40} className="mb-2 text-success" />
-              <h5 className="card-title">Signals</h5>
-              <p className="card-text">
-                Communication vehicles managing secure and reliable signal operations.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-4 mb-3 fade-in delay-3">
-          <div className="card shadow-sm h-100 text-center">
-            <div className="card-body">
-              <FaUsers size={40} className="mb-2 text-warning" />
-              <h5 className="card-title">Infantry</h5>
-              <p className="card-text">
-                Transport and troop movement vehicles supporting infantry operations.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-4 mb-3 fade-in delay-4">
-          <div className="card shadow-sm h-100 text-center">
-            <div className="card-body">
-              <FaTruck size={40} className="mb-2 text-secondary" />
-              <h5 className="card-title">Ordnance</h5>
-              <p className="card-text">
-                Logistics and ordnance vehicles handling ammunition, equipment, and supplies.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-4 mb-3 fade-in delay-5">
-          <div className="card shadow-sm h-100 text-center">
-            <div className="card-body">
-              <FaGlobe size={40} className="mb-2 text-info" />
-              <h5 className="card-title">SNT</h5>
-              <p className="card-text">
-                Special operations and tactical vehicles deployed across operational theaters.
-              </p>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Example Military Images */}
-      <div className="row gy-3">
-        {/* Detailed VMS Information */}
-<section className="mt-5 p-4 bg-light rounded shadow-sm fade-in">
-  <h4 className="mb-3">About the Vehicle Management System (VMS)</h4>
-
-  <p>
-    The <strong>Division Vehicle Management System (VMS)</strong> is a comprehensive solution 
-    designed to provide real-time monitoring, operational control, and management of all vehicles 
-    across the division. It integrates location tracking, status monitoring, maintenance scheduling, 
-    and reporting into a centralized interface accessible to commanders and HQ staff.
-  </p>
-
-  <h5 className="mt-3">How it Works</h5>
-  <p>
-    The VMS operates by collecting data from each vehicle through GPS trackers, telematics sensors, 
-    and onboard diagnostic systems. This data includes:
-  </p>
-  <ul>
-    <li>Vehicle location and movement (real-time GPS tracking)</li>
-    <li>Current operational status (moving, idle, stopped, under maintenance)</li>
-    <li>Speed, fuel consumption, and engine diagnostics</li>
-    <li>Alerts for emergencies, breakdowns, or route deviations</li>
-  </ul>
-  <p>
-    All this information is transmitted securely to the central system where it is processed, 
-    visualized on dashboards, and made available for decision-making.
-  </p>
-
-  <h5 className="mt-3">Operational Workflow</h5>
-  <ol>
-    <li><strong>Vehicle Assignment:</strong> Vehicles are assigned to units or missions through the system.</li>
-    <li><strong>Real-time Tracking:</strong> The VMS continuously monitors vehicle movements and statuses.</li>
-    <li><strong>Alert Management:</strong> Any deviation, breakdown, or emergency triggers alerts to HQ and unit commanders.</li>
-    <li><strong>Reporting:</strong> Daily, weekly, and mission-specific reports are generated for operational review.</li>
-    <li><strong>Maintenance Scheduling:</strong> Preventive maintenance is scheduled based on mileage and operational hours.</li>
-  </ol>
-
-  <h5 className="mt-3">Importance of VMS</h5>
-  <p>
-    A VMS is critical in modern military operations for several reasons:
-  </p>
-  <ul>
-    <li><strong>Operational Efficiency:</strong> Ensures vehicles are deployed optimally for missions.</li>
-    <li><strong>Situational Awareness:</strong> Commanders have a real-time overview of all vehicle positions and statuses.</li>
-    <li><strong>Maintenance & Safety:</strong> Reduces the risk of breakdowns and accidents through proactive monitoring.</li>
-    <li><strong>Resource Management:</strong> Tracks fuel usage, vehicle availability, and personnel assignments.</li>
-    <li><strong>Strategic Planning:</strong> Historical data helps in logistics, route planning, and mission readiness.</li>
-  </ul>
-
-  <h5 className="mt-3">Key Features</h5>
-  <ul>
-    <li>Real-time GPS location tracking of all vehicles</li>
-    <li>Status monitoring: Moving, Idle, Maintenance, Emergency</li>
-    <li>Alerts for route deviations, breakdowns, or incidents</li>
-    <li>Dashboard visualizations and analytics</li>
-    <li>Unit-wise vehicle allocation and history logs</li>
-    <li>Maintenance and service scheduling</li>
-    <li>Secure access for HQ, commanders, and unit staff</li>
-  </ul>
-
-  <p className="mt-3">
-    Overall, the VMS enhances the efficiency, safety, and operational control of the division’s vehicles, 
-    enabling commanders to make informed decisions, optimize logistics, and maintain combat readiness.
-  </p>
-</section>
-
-        {/* <div className="col-md-6 fade-in">
-          <img
-            src="https://cdn.pixabay.com/photo/2017/12/10/14/47/tank-3013954_1280.jpg"
-            alt="Artillery Vehicle"
-            className="img-fluid rounded shadow-sm"
-          />
-          <p className="mt-2 text-center text-muted small">
-            Example of an artillery vehicle
-          </p>
+      {/* Detailed VMS Information Section */}
+      <div className="card border-secondary shadow-sm mb-4" style={{ borderRadius: '0' }}>
+        <div className="card-header bg-dark text-white fw-bold py-2 d-flex align-items-center">
+          <FaFileAlt className="me-2" /> 
+          <span>SYSTEM OPERATIONAL BRIEFING</span>
         </div>
+        <div className="card-body bg-light" style={{ fontSize: "14px", lineHeight: "1.6" }}>
+          <div className="row">
+            {/* Column 1: Purpose & Telemetry */}
+            <div className="col-lg-6 border-end border-2">
+              <h5 className="fw-bold text-uppercase border-bottom pb-1" style={{ color: "#1e3a5f" }}>1.0 Purpose & Scope</h5>
+              <p>
+                The <strong>Division Vehicle Management System (VMS)</strong> provides real-time monitoring and 
+                management of all assets across the division. It integrates GPS tracking and 
+                reporting into a centralized interface for HQ staff.
+              </p>
 
-        <div className="col-md-6 fade-in delay-1">
-          <img
-            src="https://cdn.pixabay.com/photo/2020/03/21/08/27/military-4957555_1280.jpg"
-            alt="Logistics Vehicle"
-            className="img-fluid rounded shadow-sm"
-          />
-          <p className="mt-2 text-center text-muted small">
-            Example of logistics/ordnance truck
-          </p>
-        </div> */}
+              <h6 className="fw-bold mt-4 mb-2">2.0 TELEMETRY DATA POINTS</h6>
+              <ul className="list-unstyled">
+                <li className="mb-1">● Real-time GPS location tracking</li>
+                <li className="mb-1">● Status: Moving, Idle, Stopped, Maintenance</li>
+                <li className="mb-1">● Speed and Engine Diagnostics</li>
+                <li className="mb-1">● Route deviation and emergency alerts</li>
+              </ul>
+            </div>
+
+            {/* Column 2: Workflow & Importance */}
+            <div className="col-lg-6 ps-lg-4 mt-4 mt-lg-0">
+              <h5 className="fw-bold text-uppercase border-bottom pb-1" style={{ color: "#1e3a5f" }}>3.0 Operational Workflow</h5>
+              <ol className="ps-3 mb-4">
+                <li><strong>Tracking:</strong> Continuous monitoring of vehicle movement.</li>
+                <li><strong>Alerts:</strong> Breakdowns or emergencies trigger immediate HQ alerts.</li>
+                <li><strong>Reporting:</strong> Mission-specific logs generated for review.</li>
+                <li><strong>Maintenance:</strong> Scheduled based on mileage and engine hours.</li>
+              </ol>
+
+              <div className="p-3 bg-white border border-warning border-start-4">
+                <h6 className="fw-bold text-warning mb-1">STRATEGIC IMPORTANCE</h6>
+                <p className="small mb-0 text-muted">
+                  Ensures situational awareness for commanders, optimizes logistics, and 
+                  maintains combat readiness through proactive resource management.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Footer of the Briefing */}
+        <div className="card-footer bg-white text-center py-2">
+           <small className="fw-bold text-muted font-monospace">ELECTRONIC SIGNATURE: 41 SIGNAL UNIT R&D</small>
+        </div>
       </div>
-    </div>
+     
+
+
+
+      </div>
   );
 }

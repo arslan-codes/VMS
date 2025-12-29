@@ -1,61 +1,61 @@
-// import dvgnLogo from "../assets/images/dvgn_logo.png";
 import divisionLogo from "../assets/images/01021.png";
-// import brigadeLogo from "../assets/images/brigade1.png";
 import unitLogo from "../assets/images/UnitLogo3.png";
-
 export default function About() {
+  const styles = {
+    container: { backgroundColor: "#f8fafc", minHeight: "100vh", color: "#1e293b", padding: "40px" },
+    paper: { 
+      background: "#ffffff", 
+      border: "1px solid #94a3b8", 
+      boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+      padding: "40px",
+      maxWidth: "900px",
+      margin: "0 auto"
+    },
+    headerBox: { borderBottom: "3px solid #1e293b", marginBottom: "30px", paddingBottom: "10px" }
+  };
+
   return (
-    <div className="bg-white rounded shadow-sm p-4" style={{ maxWidth: "800px", margin: "0 auto" }}>
-      {/* Top Logo and Title */}
-      <div className="d-flex align-items-center justify-content-between mb-4">
-        {/* <img src={dvgnLogo} alt="DVGN Logo" style={{ height: "50px", marginRight: "15px" }} /> */}
-        <h4 className="mb-0">Division Vehicle Management System</h4><section className="d-flex gap-3 mt-3">
-        <img src={divisionLogo} alt="Division Logo" style={{ height: "50px" }} />
-        {/* <img src={brigadeLogo} alt="Brigade Logo" style={{ height: "50px" }} /> */}
-        <img src={unitLogo} alt="Unit Logo" style={{ height: "50px" }} />
-      </section>
+    <div style={styles.container}>
+      <div style={styles.paper}>
+        <div className="d-flex justify-content-between align-items-start" style={styles.headerBox}>
+          <div>
+            <h1 className="fw-black mb-0">ABOUT SYSTEM</h1>
+            <p className="fw-bold text-muted">VMS TECHNICAL DOCUMENTATION // 34 DIV</p>
+          </div>
+          <img src={divisionLogo} alt="Div" style={{ height: "70px" }} />
+        </div>
+
+        <div className="row">
+          <div className="col-8" style={{ borderRight: "1px solid #e2e8f0" }}>
+            <h5 className="fw-bold bg-light p-2 border-start border-dark border-4">1.0 OPERATIONAL OVERVIEW</h5>
+            <p className="mb-4">
+              The Division Vehicle Management System is a proprietary command platform 
+              developed for secure, real-time tracking of divisional assets. 
+              The system utilizes private APN protocols to ensure data integrity without 
+              exposure to public internet infrastructure.
+            </p>
+
+            <h5 className="fw-bold bg-light p-2 border-start border-dark border-4">2.0 DEVELOPMENT UNIT</h5>
+            <p>
+              Developed by <strong>41 Signal Unit</strong>. This unit is responsible for 
+              all tactical communications and electronic infrastructure within the division area of responsibility.
+            </p>
+          </div>
+
+          <div className="col-4 ps-4">
+            <h6 className="fw-bold text-uppercase small text-muted">Project Authority</h6>
+            <ul className="list-unstyled font-monospace small">
+              <li className="mb-2">● MAJ MEHR</li>
+              <li className="mb-2">● CAPT ARSLAN</li>
+              <li className="mb-2">● CAPT JAVERIA</li>
+            </ul>
+            <hr />
+            <div className="mt-4 p-2 border border-warning bg-light text-center">
+                <small className="fw-bold">CLASSIFICATION:<br/>UNCLASSIFIED // FOUO</small>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* About the VMS */}
-      <section className="mb-4">
-        <h5>About the VMS</h5>
-        <p>
-          The Division Vehicle Management System (VMS) is designed to provide real-time
-          monitoring and operational control of vehicles across the division. It allows
-          commanders and HQ staff to view vehicle locations, statuses, alerts, and other
-          critical operational data in a secure and centralized interface.
-        </p>
-      </section>
-
-      {/* About the Unit */}
-      <section className="mb-4">
-        <h5>About the Unit</h5>
-        <p>
-          Developed by <strong>41 Signal Unit</strong>, a specialized unit of the army
-          focused on communications and technological solutions. The unit has a history
-          of designing and implementing advanced systems to enhance operational efficiency
-          and battlefield situational awareness.
-        </p>
-      </section>
-
-      {/* R&D / Team */}
-      <section className="mb-4">
-        <h5>R&D and Team</h5>
-        <p>
-          This project is undertaken by the unit's R&D team, responsible for innovation
-          in military vehicle tracking and monitoring solutions. The team includes software
-          engineers, data analysts, and field experts who contribute to the design, development,
-          and testing of the VMS.
-        </p>
-        <ul>
-          <li> MAJ MEHR</li>
-          <li> CAPT ARSLAN</li>
-          <li> CAPT JAVERIA</li>
-        </ul>
-      </section>
-
-      {/* Formation / Division Logos */}
-      
     </div>
   );
 }

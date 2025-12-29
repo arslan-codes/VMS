@@ -1,71 +1,86 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { FaCar } from "react-icons/fa"; // Example: car icon from react-icons
+import { FaCar } from "react-icons/fa";
 import { renderToStaticMarkup } from "react-dom/server";
 
-export default function MapView({ data, useToner = false }) {
+export default function MapView({ vehicles }) { // Changed prop name to 'vehicles'
   const mapRef = useRef(null);
-  const markersRef = useRef({}); // store multiple markers
+  const markersRef = useRef({});
 
-  // Initialize map
   useEffect(() => {
+    // Initialize map only once
     if (!mapRef.current) {
-      mapRef.current = L.map("map", {
-        center: [33.7, 72.8],
-        zoom: 9,
-      });
-
-      // Choose tile layer
-      if (useToner) {
-        L.tileLayer("https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png", {
-          attribution:
-            'Map tiles by <a href="https://stamen.com/">Stamen Design</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        }).addTo(mapRef.current);
-      } else {
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        }).addTo(mapRef.current);
-      }
+      mapRef.current = L.map("map", { center: [33.7, 72.8], zoom: 9 });
+      L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(mapRef.current);
     }
-  }, [useToner]);
+  }, []);
 
-  // Update markers
   useEffect(() => {
-    if (data && mapRef.current) {
-      const vehicles = Array.isArray(data) ? data : [data];
+    if (vehicles && mapRef.current) {
+      // 1. Logic to handle single object or array
+      const vehicleList = Array.isArray(vehicles) ? vehicles : [vehicles];
 
-      vehicles.forEach((vehicle) => {
-        const { id, latitude, longitude } = vehicle;
-
-        // Create a DivIcon with React Icon inside
-        const iconMarkup = renderToStaticMarkup(
-          <div style={{ color: "red", fontSize: "24px" }}>
-            <FaCar />
-          </div>
-        );
-        const reactIcon = L.divIcon({
-          html: iconMarkup,
-          className: "", // remove default marker styles
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
-        });
-
-        if (!markersRef.current[id]) {
-          markersRef.current[id] = L.marker([latitude, longitude], { icon: reactIcon }).addTo(
-            mapRef.current
-          );
-        } else {
-          markersRef.current[id].setLatLng([latitude, longitude]);
+      // 2. Clear markers that are no longer in the list (Cleanup)
+      const currentIds = vehicleList.map(v => v.id);
+      Object.keys(markersRef.current).forEach(id => {
+        if (!currentIds.includes(id)) {
+          mapRef.current.removeLayer(markersRef.current[id]);
+          delete markersRef.current[id];
         }
       });
 
-      // Center map on first vehicle
-      const first = vehicles[0];
-      if (first) mapRef.current.setView([first.latitude, first.longitude], 13);
-    }
-  }, [data]);
+      // 3. Update or Add markers
+      vehicleList.forEach((vehicle) => {
+        // Updated to use 'lat' and 'lng' to match Dashboard data
+        const { id, lat, lng, speed, status } = vehicle;
 
-  return <div id="map" style={{ width: "100%", height: "100%" }}></div>;
+        const iconMarkup = renderToStaticMarkup(
+          <div style={{ 
+            backgroundColor: "#fff", 
+            border: `2px solid ${status === "MOVING" ? "#059669" : "#1e3a5f"}`, 
+            borderRadius: "50%", 
+            padding: "5px",
+            boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+            color: status === "MOVING" ? "#059669" : "#1e3a5f"
+          }}>
+            <FaCar style={{ display: 'block' }} />
+          </div>
+        );
+
+        const tacticalIcon = L.divIcon({
+          html: iconMarkup,
+          className: "",
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        });
+
+        if (!markersRef.current[id]) {
+          // New Marker
+          markersRef.current[id] = L.marker([lat, lng], { icon: tacticalIcon })
+            .addTo(mapRef.current)
+            .bindPopup(`<b>Unit ID:</b> ${id}<br/><b>Status:</b> ${status}<br/><b>Speed:</b> ${speed}`);
+        } else {
+          // Move Existing Marker
+          markersRef.current[id].setLatLng([lat, lng]);
+          markersRef.current[id].setIcon(tacticalIcon); // Update icon color if status changed
+        }
+      });
+    }
+  }, [vehicles]);
+
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <div id="map" style={{ width: "100%", height: "100%", border: "2px solid #94a3b8" }}></div>
+      <div style={{ 
+        position: 'absolute', top: '10px', right: '10px', zIndex: 1000,
+        background: 'rgba(255,255,255,0.9)', padding: '5px 10px', border: '1px solid #94a3b8',
+        fontSize: '11px', fontWeight: 'bold'
+      }}>
+        MAP STATUS: <span style={{ color: '#059669' }}>OPERATIONAL</span>
+      </div>
+    </div>
+  );
 }
