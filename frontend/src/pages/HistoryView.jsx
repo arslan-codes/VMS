@@ -12,16 +12,35 @@ const vehicleIcon = new L.Icon({
 
 // Dummy Path Data (simulating 4G IP pings)
 const flightPath = [
-  { lat: 33.772025, lng: 72.782718, speed: 0,  time: "09:00 AM", status: "Ignition On" },
-  { lat: 33.773500, lng: 72.785000, speed: 25, time: "09:02 AM", status: "Moving" },
-  { lat: 33.775800, lng: 72.789500, speed: 42, time: "09:05 AM", status: "Moving" },
-  { lat: 33.778200, lng: 72.795000, speed: 55, time: "09:08 AM", status: "Moving" },
-  { lat: 33.781000, lng: 72.802000, speed: 60, time: "09:12 AM", status: "Moving" },
-  { lat: 33.784500, lng: 72.810000, speed: 35, time: "09:15 AM", status: "Approaching Checkpoint" },
-  { lat: 33.787000, lng: 72.818000, speed: 15, time: "09:18 AM", status: "Slow Traffic" },
-  { lat: 33.790500, lng: 72.825000, speed: 48, time: "09:22 AM", status: "Moving" },
-  { lat: 33.794000, lng: 72.835000, speed: 52, time: "09:25 AM", status: "Moving" },
-  { lat: 33.798500, lng: 72.845000, speed: 10, time: "09:30 AM", status: "Arrived at Destination" }
+  { lat: 33.772513, lng: 72.780174, speed: 0,  time: "09:00 AM", status: "Ignition On" },
+  { lat: 33.772455, lng: 72.780230, speed: 8,  time: "09:01 AM", status: "Moving" },
+  { lat: 33.772397, lng: 72.780286, speed: 14, time: "09:02 AM", status: "Moving" },
+  { lat: 33.772339, lng: 72.780342, speed: 22, time: "09:03 AM", status: "Moving" },
+  { lat: 33.772281, lng: 72.780398, speed: 28, time: "09:04 AM", status: "Moving" },
+
+  { lat: 33.772223, lng: 72.780454, speed: 35, time: "09:05 AM", status: "Cruising" },
+  { lat: 33.772165, lng: 72.780510, speed: 42, time: "09:06 AM", status: "Cruising" },
+  { lat: 33.772107, lng: 72.780566, speed: 48, time: "09:07 AM", status: "Cruising" },
+  { lat: 33.772049, lng: 72.780622, speed: 52, time: "09:08 AM", status: "Moving" },
+  { lat: 33.771991, lng: 72.780678, speed: 55, time: "09:09 AM", status: "Moving" },
+
+  { lat: 33.771933, lng: 72.780734, speed: 58, time: "09:10 AM", status: "Highway Speed" },
+  { lat: 33.771875, lng: 72.780790, speed: 60, time: "09:11 AM", status: "Highway Speed" },
+  { lat: 33.771817, lng: 72.780846, speed: 57, time: "09:12 AM", status: "Cruising" },
+  { lat: 33.771759, lng: 72.780902, speed: 50, time: "09:13 AM", status: "Cruising" },
+  { lat: 33.771701, lng: 72.780958, speed: 45, time: "09:14 AM", status: "Approaching Area" },
+
+  { lat: 33.771643, lng: 72.781014, speed: 38, time: "09:15 AM", status: "Urban Traffic" },
+  { lat: 33.771585, lng: 72.781070, speed: 30, time: "09:16 AM", status: "Urban Traffic" },
+  { lat: 33.771527, lng: 72.781126, speed: 22, time: "09:17 AM", status: "Slow Moving" },
+  { lat: 33.771469, lng: 72.781182, speed: 18, time: "09:18 AM", status: "Near Destination" },
+  { lat: 33.771411, lng: 72.781238, speed: 12, time: "09:19 AM", status: "Near Destination" },
+
+  { lat: 33.771353, lng: 72.781294, speed: 8,  time: "09:20 AM", status: "Slowing Down" },
+  { lat: 33.771295, lng: 72.781350, speed: 5,  time: "09:21 AM", status: "Final Approach" },
+  { lat: 33.771237, lng: 72.781406, speed: 3,  time: "09:22 AM", status: "Parking" },
+  { lat: 33.771179, lng: 72.781462, speed: 1,  time: "09:23 AM", status: "Stopping" },
+  { lat: 33.771122, lng: 72.781515, speed: 0,  time: "09:24 AM", status: "Arrived at Destination" }
 ];
 
 export default function HistoryView() {

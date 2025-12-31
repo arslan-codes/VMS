@@ -4,7 +4,7 @@ import {
   AlertTriangle, Gauge, ShieldAlert
 } from "lucide-react";
 import { Map as MapIcon } from "lucide-react";
-
+import divLogo  from "../assets/images/divlogo.png";
 export default function Sidebar({ active, setActive }) {
   const menuGroups = [
     {
@@ -50,6 +50,8 @@ export default function Sidebar({ active, setActive }) {
     <div className="d-flex flex-column bg-dark text-white shadow" style={{ width: "260px", height: "100vh", flexShrink: 0 }}>
       {/* Branding Header */}
       <div className="p-4 border-bottom border-secondary bg-black text-center">
+                <img src={divLogo} alt="34 DIV HQ" style={{ height: "60px", objectFit: "contain" }} />
+        
         <h4 className="mb-0 fw-bold tracking-tighter">34 DIV VMS</h4>
         <small className="text-success fw-bold letter-spacing-2" style={{ fontSize: '11px' }}>TACTICAL HQ</small>
       </div>

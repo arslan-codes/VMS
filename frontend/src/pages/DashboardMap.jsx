@@ -15,17 +15,17 @@ export default function DashboardMap() {
     <div className="h-100 position-relative w-100 bg-dark">
       {/* 1. Floating Tactical Metrics Overlay */}
       <div className="position-absolute top-0 start-0 m-3 d-flex flex-column gap-2" style={{ zIndex: 1000, width: '280px' }}>
-        <div className="card bg-dark text-white border-secondary shadow-lg opacity-90 p-3">
-          <div className="d-flex align-items-center gap-2 mb-2 text-primary">
+        <div className="card bg-dark text-white border-secondary bg-black  shadow-lg bg-opacity-25 p-3">
+          <div className="d-flex align-items-center gap-2 mb-2  text-primary">
             <Radio size={18} className="animate-pulse" />
             <span className="fw-bold small text-uppercase">Live Signals</span>
           </div>
-          <div className="d-flex justify-content-between mb-1">
+          <div className="d-flex bg-transparent justify-content-between mb-1">
             <small className="text-muted">Active Pings</small>
             <span className="badge bg-success">14 Units</span>
           </div>
           <div className="d-flex justify-content-between">
-            <small className="text-muted">Comm Status</small>
+            <small className="text-white">Comm Status</small>
             <span className="text-success small">Stable</span>
           </div>
         </div>

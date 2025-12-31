@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 
 export default function StatHeader() {
   const stats = [
-    { label: "Total Assets", value: "731", color: "text-white" },
+    { label: "Total Assets", value: "731", color: "text-black" },
     { label: "Active", value: "450", color: "text-success" },
     { label: "Faulty", value: "281", color: "text-danger" },
     { label: "Violations (24h)", value: "12", color: "text-warning" },
