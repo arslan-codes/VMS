@@ -1,72 +1,70 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
-import Topbar from "./components/Topbar";
-import Dashboard from "./pages/Dashboard";
-import Vehicles from "./pages/Vehicles";
-import Settings from "./pages/Settings";
-import About from "./pages/About";
-import Home from "./pages/Home";
+import StatHeader from "./components/StatHeader";
 
-import './index.css'; 
+// Import your page components
+import AlertsPage from "./pages/AlertsPage";
+import AssetRegistry from "./pages/AssetRegistry";
+import FleetStatus from "./pages/FleetStatus";
+import MileageReport from "./pages/MileageReport";
+
+import HistoryView from "./pages/HistoryView";
+import DashboardMap from "./pages/DashboardMap";
+import NightMove from "./pages/NightMove";
+import PanicList from "./pages/PanicList";
+import TeamPage from "./pages/TeamPage";
+import Architecture from "./pages/Architecture.JSX";
+
+
 
 export default function App() {
-  // Set default starting page to 'home' so soldiers see the briefing first
-  const [page, setPage] = useState("home");
+  const [activePage, setActivePage] = useState("dashboard");
 
-  function renderPage() {
-    switch (page) {
-      case "home":
-        return <Home />;
+  // This function decides which "Screen" to show based on the Sidebar click
+  const renderContent = () => {
+    switch (activePage) {
       case "dashboard":
-        return <Dashboard />;
-      case "vehicles":
-        return <Vehicles />;
-      case "settings":
-        return <Settings />;
-      case "about":
-        return <About />;
+        return <DashboardMap />;
+      case "architecture":
+        return <Architecture />;
+    case "rd_team":
+        return <TeamPage />;
+      case "fleet":
+        return <FleetStatus />;
+      case "history":
+        return <HistoryView />;
+      case "alerts":
+        return <AlertsPage />;
+      case "night_move":
+  return <NightMove />;
+  case "panic":
+  return <PanicList />;
+      case "moving":
+        return <AssetRegistry/>
+        case "mileage":
+  return <MileageReport />;
       default:
-        return <Home />;
-    }
-  }
-
-  // Logic to format the Topbar title nicely
-  const getDisplayTitle = () => {
-    switch(page) {
-      case "home": return "34 DIV | OPERATIONAL OVERVIEW";
-      case "dashboard": return "LIVE COMMAND DASHBOARD";
-      case "vehicles": return "ASSET INVENTORY & STATUS";
-      case "settings": return "SYSTEM CONFIGURATION";
-      case "about": return "TECHNICAL SPECIFICATIONS";
-      default: return "VEHICLE MANAGEMENT SYSTEM";
+        return (
+          <div className="p-5 text-center">
+            <h4 className="text-muted">Module "{activePage}" is being configured.</h4>
+          </div>
+        );
     }
   };
 
-
   return (
-    <div className="d-flex" style={{ height: "100vh", width: "100vw", overflow: "hidden" }}>
+    <div className="d-flex" style={{ height: "100vh", overflow: "hidden" }}>
+      {/* Sidebar - Passes the setter function to update App state */}
+      <Sidebar active={activePage} setActive={setActivePage} />
       
-      {/* SIDEBAR: Locked width */}
-      <div style={{ flex: "0 0 260px", backgroundColor: "#0f172a" }}>
-        <Sidebar active={page} setActive={setPage} />
-      </div>
-
-      {/* RIGHT SIDE: Fixed Column */}
-      <div className="d-flex flex-column flex-grow-1" style={{ minWidth: 0 }}>
+      <div className="flex-grow-1 d-flex flex-column bg-light">
+        {/* Header - Stays fixed at the top */}
+        <StatHeader />
         
-        {/* TOPBAR: Fixed Height */}
-        <div style={{ height: "60px", flexShrink: 0 }}>
-          <Topbar title={page.toUpperCase()} />
-        </div>
-
-        {/* MAIN CONTENT: The only thing allowed to scroll */}
-        <main style={{ flexGrow: 1, overflowY: "auto", backgroundColor: "#f8fafc" }}>
-          {/* Use w-100 and no max-width here */}
-          <div className="p-4 w-100">
-            {renderPage()}
-          </div>
+        {/* Dynamic Content Area */}
+        <main className="flex-grow-1 overflow-auto">
+          {renderContent()}
         </main>
-
       </div>
     </div>
   );

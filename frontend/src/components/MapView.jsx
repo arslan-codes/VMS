@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+
 import { FaCar } from "react-icons/fa";
 import { renderToStaticMarkup } from "react-dom/server";
 

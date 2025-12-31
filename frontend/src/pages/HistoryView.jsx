@@ -1,0 +1,173 @@
+import React, { useState, useEffect, useRef } from "react";
+import { Play, Pause, RotateCcw, Navigation, Zap, Clock, ChevronRight } from "lucide-react";
+import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
+
+// Create a custom vehicle icon
+const vehicleIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/809/809998.png", // Replace with a local tank/jeep icon later
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
+// Dummy Path Data (simulating 4G IP pings)
+const flightPath = [
+  { lat: 33.772025, lng: 72.782718, speed: 0,  time: "09:00 AM", status: "Ignition On" },
+  { lat: 33.773500, lng: 72.785000, speed: 25, time: "09:02 AM", status: "Moving" },
+  { lat: 33.775800, lng: 72.789500, speed: 42, time: "09:05 AM", status: "Moving" },
+  { lat: 33.778200, lng: 72.795000, speed: 55, time: "09:08 AM", status: "Moving" },
+  { lat: 33.781000, lng: 72.802000, speed: 60, time: "09:12 AM", status: "Moving" },
+  { lat: 33.784500, lng: 72.810000, speed: 35, time: "09:15 AM", status: "Approaching Checkpoint" },
+  { lat: 33.787000, lng: 72.818000, speed: 15, time: "09:18 AM", status: "Slow Traffic" },
+  { lat: 33.790500, lng: 72.825000, speed: 48, time: "09:22 AM", status: "Moving" },
+  { lat: 33.794000, lng: 72.835000, speed: 52, time: "09:25 AM", status: "Moving" },
+  { lat: 33.798500, lng: 72.845000, speed: 10, time: "09:30 AM", status: "Arrived at Destination" }
+];
+
+export default function HistoryView() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(500); // ms
+  const timerRef = useRef(null);
+
+  // Function to handle animation logic
+  useEffect(() => {
+    if (isPlaying && currentIndex < flightPath.length - 1) {
+      timerRef.current = setTimeout(() => {
+        setCurrentIndex((prev) => prev + 1);
+      }, playbackSpeed);
+    } else {
+      setIsPlaying(false);
+      clearTimeout(timerRef.current);
+    }
+    return () => clearTimeout(timerRef.current);
+  }, [isPlaying, currentIndex, playbackSpeed]);
+
+  const resetPlayback = () => {
+    setIsPlaying(false);
+    setCurrentIndex(0);
+  };
+
+  const currentPos = flightPath[currentIndex];
+
+  return (
+    <div className="h-100 d-flex flex-column bg-light" style={{ minHeight: '90vh' }}>
+      
+      {/* 1. Control Header */}
+      <div className="bg-dark text-white p-3 d-flex align-items-center gap-4 shadow">
+        <div>
+          <h5 className="mb-0 fw-bold">Route Playback</h5>
+          <small className="text-info">Asset: 34-A-1234 | 41 Sig Unit</small>
+        </div>
+
+        <div className="d-flex gap-2 ms-auto">
+          <input type="date" className="form-control form-control-sm bg-secondary text-white border-0" />
+          <button className="btn btn-primary btn-sm px-3">Load Data</button>
+        </div>
+      </div>
+
+      {/* 2. Map Area */}
+      <div className="flex-grow-1 position-relative">
+        <MapContainer center={[33.772025, 72.782718]}
+        zoom={14} className="h-100 w-100">
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          
+          {/* Static Full Path Line */}
+          <Polyline positions={flightPath.map(p => [p.lat, p.lng])} color="#4f46e5" weight={3} dashArray="5, 10" />
+          
+          {/* The Active Trail (Progressive Line) */}
+          <Polyline 
+            positions={flightPath.slice(0, currentIndex + 1).map(p => [p.lat, p.lng])} 
+            color="#22c55e" 
+            weight={5} 
+          />
+
+          {/* The Moving Vehicle */}
+          <Marker position={[currentPos.lat, currentPos.lng]} icon={vehicleIcon}>
+            <Popup>
+              <strong>{currentPos.time}</strong><br/>
+              Speed: {currentPos.speed} km/h
+            </Popup>
+          </Marker>
+
+          <RecenterMap lat={currentPos.lat} lng={currentPos.lng} />
+        </MapContainer>
+
+        {/* Floating Telemetry HUD */}
+        <div className="position-absolute top-0 start-0 m-3" style={{ zIndex: 1000 }}>
+          <div className="card bg-dark text-white border-0 shadow-lg p-3 opacity-90" style={{ width: '200px' }}>
+            <div className="small text-muted mb-2 text-uppercase fw-bold">Telemetry</div>
+            <div className="d-flex justify-content-between mb-1">
+              <span><Zap size={14} className="text-warning"/> Speed</span>
+              <span className="fw-bold">{currentPos.speed} <small>km/h</small></span>
+            </div>
+            <div className="d-flex justify-content-between mb-1">
+              <span><Clock size={14} className="text-info"/> Time</span>
+              <span className="fw-bold">{currentPos.time}</span>
+            </div>
+            <div className="progress mt-2" style={{ height: '4px' }}>
+              <div 
+                className="progress-bar bg-success" 
+                style={{ width: `${(currentIndex / (flightPath.length - 1)) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Replay Controller Bar */}
+      <div className="bg-white border-top p-3 px-5 shadow-lg">
+        <div className="row align-items-center">
+          <div className="col-auto d-flex gap-2">
+            <button 
+              className={`btn ${isPlaying ? 'btn-outline-danger' : 'btn-primary'} rounded-circle p-2`} 
+              onClick={() => setIsPlaying(!isPlaying)}
+            >
+              {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+            </button>
+            <button className="btn btn-light rounded-circle p-2" onClick={resetPlayback}>
+              <RotateCcw size={24} />
+            </button>
+          </div>
+
+          <div className="col px-4">
+            <input 
+              type="range" 
+              className="form-range" 
+              min="0" 
+              max={flightPath.length - 1} 
+              value={currentIndex} 
+              onChange={(e) => setCurrentIndex(parseInt(e.target.value))}
+            />
+            <div className="d-flex justify-content-between small fw-bold text-muted mt-1">
+              <span>{flightPath[0].time} (Start)</span>
+              <span className="text-primary px-3 bg-light rounded">Sequence: {currentIndex + 1} / {flightPath.length}</span>
+              <span>{flightPath[flightPath.length-1].time} (End)</span>
+            </div>
+          </div>
+
+          <div className="col-auto">
+            <select 
+              className="form-select form-select-sm fw-bold border-primary"
+              onChange={(e) => setPlaybackSpeed(parseInt(e.target.value))}
+            >
+              <option value="1000">Speed: 0.5x</option>
+              <option value="500" selected>Speed: 1.0x</option>
+              <option value="200">Speed: 2.0x</option>
+              <option value="50">Speed: 5.0x</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Helper component to auto-pan the map during playback
+function RecenterMap({ lat, lng }) {
+  const map = useMap();
+  useEffect(() => {
+    map.panTo([lat, lng]);
+  }, [lat, lng, map]);
+  return null;
+}
