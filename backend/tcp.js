@@ -15,6 +15,9 @@ wsServer.on("connection", ws => {
 
 console.log(`WebSocket Server running on port ${WS_PORT}`);
 
+console.log("Starting TCP Server...");
+console.log("Listening for incoming tracker connections...");
+console.log("=====================================");
 /* ================= PARSER ================= */
 function parseASCII(text) {
   try {

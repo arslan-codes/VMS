@@ -43,6 +43,8 @@ const flightPath = [
   { lat: 33.771122, lng: 72.781515, speed: 0,  time: "09:24 AM", status: "Arrived at Destination" }
 ];
 
+
+
 export default function HistoryView() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -65,7 +67,7 @@ export default function HistoryView() {
   const resetPlayback = () => {
     setIsPlaying(false);
     setCurrentIndex(0);
-  };
+  };1
 
   const currentPos = flightPath[currentIndex];
 

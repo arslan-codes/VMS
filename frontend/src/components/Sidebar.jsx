@@ -53,7 +53,7 @@ export default function Sidebar({ active, setActive }) {
                 <img src={divLogo} alt="34 DIV HQ" style={{ height: "60px", objectFit: "contain" }} />
         
         <h4 className="mb-0 fw-bold tracking-tighter">34 DIV VMS</h4>
-        <small className="text-success fw-bold letter-spacing-2" style={{ fontSize: '11px' }}>TACTICAL HQ</small>
+        {/* <small className="text-success fw-bold letter-spacing-2" style={{ fontSize: '11px' }}>TACTICAL HQ</small> */}
       </div>
 
       {/* Navigation Area */}
