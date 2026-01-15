@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VT100 Private Fleet</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 90vh; width: 100%; border-radius: 10px; }
+        body { font-family: sans-serif; background: #1a1a1a; color: white; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h3>Ufone Private Network Status: <span id="stat" style="color:orange">Initializing...</span></h3>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([30.3753, 69.3451], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/hot/{z}/{x}/{y}.png').addTo(map);
+        const ws = new WebSocket("ws://localhost:8080");
+        const markers = {};
+
+        ws.onopen = () => document.getElementById('stat').innerText = "Online";
+        ws.onmessage = (e) => {
+            const d = JSON.parse(e.data);
+            if(!markers[d.imei]) markers[d.imei] = L.marker([d.lat, d.lng]).addTo(map).bindPopup(d.imei);
+            else markers[d.imei].setLatLng([d.lat, d.lng]);
+        };
+    </script>
+</body>
+</html>
