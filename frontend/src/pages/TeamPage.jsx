@@ -35,13 +35,14 @@ export default function TeamPage() {
           <div className="card border-0 shadow-sm overflow-hidden" style={{ borderRadius: '15px' }}>
             <div className="row g-0 align-items-center">
               <div className="col-md-12 p-4 bg-white border-start border-success border-5">
-                <h3 className="fw-bold mb-0 text-dark h4">Lt Col Karrar</h3>
+                <h3 className="fw-bold mb-0 text-dark h4">Lt Col Karrar Hussain</h3>
                 <p className="text-primary fw-bold text-uppercase mb-2" style={{ fontSize: '0.85rem' }}>CO 41 Signals Unit</p>
                 <p className="text-dark mb-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                   Conceived the vision for an IP-based 4G VMS arch 
-                  to bridge the gap in tactical veh oversight, providing the STRAD for the trans
+                  to bridge the gap in tactical veh oversight, providing the strategic for the trans
                    from SMS-based sys to a high-speed, 4G-enabled RT net.
-                   {/* please write the military abbreviarions for this Conceived the vision for an IP-based 4G VMS architecture to bridge the gap in tactical vehicle oversight, providing the strategic roadmap for the transition from SMS-based systems to a high-speed, 4G-enabled real-time network. */}
+                   {/* please write the military abbreviarions for this Conceived the vision for an IP-based 4G VMS architecture to bridge the gap in tactical vehicle oversight, 
+                   providing the strategic roadmap for the transition from SMS-based systems to a high-speed, 4G-enabled real-time network. */}
                 </p>
               </div>
             </div>

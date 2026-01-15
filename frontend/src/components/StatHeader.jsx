@@ -1,5 +1,7 @@
 import React from "react";
 import { Search } from "lucide-react";
+import signalsLogo from "../assets/images/UnitLogo3.png"
+
 
 export default function StatHeader() {
   const stats = [
@@ -20,15 +22,9 @@ export default function StatHeader() {
         ))}
       </div>
 
-      <div className="d-flex align-items-center bg-light rounded-pill px-3 py-2" style={{ width: "300px" }}>
-        <Search size={18} className="text-muted me-2" />
-        <input 
-          type="text" 
-          placeholder="Search BA Number..." 
-          className="bg-transparent border-0 outline-none w-100"
-          style={{ fontSize: '14px' }}
-        />
-      </div>
+      <div className="d-flex justify-content-end px-3 py-2" style={{ width: "300px" }}>
+  <img src={signalsLogo} alt="41 Signals" style={{ height: "60px", objectFit: "contain" }} />
+</div>
     </div>
   );
 }

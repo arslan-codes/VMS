@@ -10,16 +10,16 @@ export default function Sidebar({ active, setActive }) {
     {
       label: "Operational",
       items: [
-        { id: "dashboard", label: "COMD Dashboard", icon: <LayoutDashboard size={20} /> },
-        { id: "fleet", label: "Fleet Status", icon: <Car size={20} /> },
-        { id: "moving", label: "Move Inspection", icon: <MapIcon size={20} /> }
+        { id: "dashboard", label: "Main Dashboard", icon: <LayoutDashboard size={20} /> },
+        { id: "fleet", label: "Vehicle Status", icon: <Car size={20} /> },
+        { id: "moving", label: "Move Sanctions", icon: <MapIcon size={20} /> }
       ]
     },
     {
       label: "Audit & Reports",
       items: [
-        { id: "mileage", label: "Mileage Report", icon: <Gauge size={20} /> },
-        { id: "history", label: "Route History", icon: <History size={20} /> },
+        { id: "mileage", label: "Move History", icon: <Gauge size={20} /> },
+        { id: "history", label: "Active Move ", icon: <History size={20} /> },
         { id: "night_move", label: "Night Move Logs", icon: <ShieldAlert size={20} /> },
       ]
     },
@@ -27,7 +27,7 @@ export default function Sidebar({ active, setActive }) {
       label: "Security & Sanctions",
       items: [
         { id: "alerts", label: "Violations/Alerts", icon: <AlertTriangle size={20} /> },
-        { id: "panic", label: "Panic/Battery List", icon: <ShieldAlert size={20} color="#ef4444" /> },
+        { id: "panic", label: "Faulty/Removal update", icon: <ShieldAlert size={20} color="#ef4444" /> },
       ]
     },
     {
