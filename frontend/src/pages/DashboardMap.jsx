@@ -69,8 +69,8 @@ export default function BlinkingTacticalMap() {
           
           <div className="d-flex align-items-center gap-4">
             <div className="border-end border-secondary pe-4">
-              <h6 className="text-success fw-bold mb-0">34 DIV COMMAND</h6>
-              <small className="text-muted" style={{ fontSize: '9px' }}>LIVE TACTICAL FEED</small>
+              <h6 className="text-success fw-bold mb-0">34 DIV AOR</h6>
+              <small className="text-white" style={{ fontSize: '9px' }}>MAP</small>
             </div>
 
             <div className="d-flex gap-2">
@@ -101,7 +101,9 @@ export default function BlinkingTacticalMap() {
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
       >
-        <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+        {/* <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" /> */}
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
         <MapController activeUnit={activeUnit} />
 
         {Object.entries(hierarchy).map(([unitName, data]) => {
