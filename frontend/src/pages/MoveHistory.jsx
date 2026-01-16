@@ -16,6 +16,7 @@ const getVehicleIcon = (type) => {
   });
 };
 
+
 // 24 DIV FLEET DATA SETUP
 const fleetData = {
   "BA-4501": { name: "Single Cabin", unit: "41 Sig Unit", type: "Single Cabin", div: "34 Div" },
@@ -34,7 +35,7 @@ Object.keys(fleetData).forEach((ba, index) => {
   fleetData[ba].path = generateMockPath(33.772 + (index * 0.01), 72.780 + (index * 0.005));
 });
 
-export default function HistoryView() {
+export default function ActiveMove() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [selectedBA, setSelectedBA] = useState("BA-4501");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -56,29 +57,48 @@ export default function HistoryView() {
   }, [isPlaying, currentIndex, playbackSpeed, flightPath]);
 
   return (
-    <div className="d-flex bg-light shadow-sm" style={{ height: "92vh", overflow: "hidden" }}>
-      
+    <div className="d-flex  border-2  shadow-sm" style={{ height: "100vh", overflow: "hidden" }}>
+      {/* --- CSS STYLES FOR SCROLLBAR --- */}
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #000;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #333;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #198754; /* Success Green on hover */
+        }
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #333 #000;
+        }
+      `}</style>
       {/* --- ASSET SIDEBAR (24 DIV) --- */}
-      <div className={`bg-dark transition-all shadow-lg ${isSidebarOpen ? 'w-300' : 'w-0'}`} 
+      <div className={`bg-black   transition-all shadow-lg ${isSidebarOpen ? 'w-300' : 'w-0'}`} 
            style={{ width: isSidebarOpen ? '320px' : '0px', transition: '0.3s ease', overflow: 'hidden', zIndex: 1050 }}>
-        <div style={{ width: '320px' }} className="p-3 text-white">
+        <div style={{ width: '320px' }} className="p-3 border-2  text-white">
           <div className="d-flex justify-content-between align-items-center mb-1">
-            <h6 className="text-info fw-bold mb-0">Vehicles</h6>
+            <h6 className="text-success fw-bold mb-0">Vehicles</h6>
           </div>
-          <small className="text-muted d-block mb-3 border-bottom border-secondary pb-2">ORBAT Overview</small>
+          <small className="text-white d-block mb-3 border-bottom border-secondary pb-2"> Overview</small>
           
           <div className="input-group input-group-sm mb-3">
             <span className="input-group-text bg-secondary border-0 text-white"><Search size={14}/></span>
             <input type="text" className="form-control bg-secondary border-0 text-white shadow-none" placeholder="Search BA / Unit..." />
           </div>
 
-          <div className="overflow-auto" style={{ height: '70vh' }}>
+          <div className="overflow-auto custom-scrollbar flex-grow-1 pe-2" style={{ maxHeight: 'calc(100vh - 150px)' }}>
             {Object.keys(fleetData).map(ba => (
               <div key={ba} onClick={() => { setSelectedBA(ba); setCurrentIndex(0); setIsPlaying(false); }}
-                   className={`p-2 px-3 mb-2 rounded border-start border-4 cursor-pointer transition ${selectedBA === ba ? 'bg-primary border-info' : 'bg-secondary opacity-50'}`}>
+                   className={`p-2 px-3 mb-2 rounded border-start border-4 cursor-pointer transition ${selectedBA === ba ? 'bg-primary border-white' : 'bg-secondary opacity-50'}`}>
                 <div className="d-flex justify-content-between align-items-center">
                   <span className="fw-bold" style={{ letterSpacing: '1px' }}>{ba}</span>
-                  <span className="badge bg-dark text-info x-small" style={{ fontSize: '10px' }}>{fleetData[ba].type}</span>
+                  <span className="badge bg-black text-white x-small" style={{ fontSize: '10px' }}>{fleetData[ba].type}</span>
                 </div>
                 <small className="d-block text-white-50">{fleetData[ba].unit}</small>
               </div>
@@ -88,21 +108,21 @@ export default function HistoryView() {
       </div>
 
       {/* --- MAIN CONTENT AREA --- */}
-      <div className="flex-grow-1 d-flex flex-column position-relative bg-secondary">
+      <div className="flex-grow-1 d-flex flex-column position-relative bg-success">
         
         {/* Sidebar Toggle */}
         <button onClick={() => setSidebarOpen(!isSidebarOpen)} 
-                className="btn btn-dark border border-secondary position-absolute start-0 top-50 translate-middle-y rounded-end p-1 shadow-lg" 
+                className="btn btn-dark ms-2 border border-secondary bg-black position-absolute start-0 top-50 translate-middle-y rounded-end p-1 shadow-lg" 
                 style={{ zIndex: 1100, left: 0 }}>
           {isSidebarOpen ? <ChevronLeft size={20}/> : <ChevronRight size={20}/>}
         </button>
 
         {/* 1. Control Header */}
-        <div className="bg-dark text-white p-3 d-flex align-items-center gap-4 shadow" style={{ zIndex: 1001 }}>
+        <div className="bg-black border-2 border-white  border-bottom  text-white p-3 d-flex align-items-center gap-4 shadow" style={{ zIndex: 1001 }}>
           <div>
-            <h5 className="mb-0 fw-bold">{selectedBA} <small className="text-muted">| {currentAsset.name}</small></h5>
+            <h5 className="mb-0 fw-bold">{selectedBA} <small className="text-white">| {currentAsset.name}</small></h5>
             <div className="d-flex gap-3 mt-1">
-                <span className="badge bg-info text-dark">{currentAsset.unit}</span>
+                <span className="badge bg-warning text-dark">{currentAsset.unit}</span>
                 <span className="badge bg-secondary">{currentAsset.div}</span>
             </div>
           </div>
@@ -164,10 +184,42 @@ function RecenterMap({ lat, lng }) {
 
 // Path Generator
 function generateMockPath(startLat, startLng) {
-  return Array.from({ length: 40 }, (_, i) => ({
-    lat: startLat + (i * 0.0004),
-    lng: startLng + (i * 0.0006),
-    speed: Math.floor(Math.random() * 40) + 20,
-    time: `${10}:${i < 10 ? '0' + i : i} AM`,
-  }));
+  let currentLat = startLat;
+  let currentLng = startLng;
+
+  return Array.from({ length: 100 }, (_, i) => {
+    let latStep = 0;
+    let lngStep = 0;
+
+    // These segments are calibrated for the specific street lengths in your image
+    if (i < 35) {
+      // SEGMENT 1: Driving North-West up the street
+      latStep = 0.00008; 
+      lngStep = -0.00004;
+    } else if (i < 65) {
+      // SEGMENT 2: THE TURN - Vehicle turns right at the T-junction
+      // Moving North-East along the horizontal-ish road
+      latStep = 0.00005;
+      lngStep = 0.00008;
+    } else {
+      // SEGMENT 3: Turning North to follow the main road exit
+      latStep = 0.0005;
+      lngStep = 0.00002;
+    }
+
+    // CRITICAL: Very low jitter (0.000002) so it doesn't leave the road line
+    const jitter = (Math.random() - 0.5) * 0.000004;
+
+    currentLat += latStep + jitter;
+    currentLng += lngStep + jitter;
+
+    return {
+      lat: currentLat,
+      lng: currentLng,
+      speed: Math.floor(Math.random() * 5) + 30, // Realistic speed for residential turns
+      time: new Date(Date.now() + i * 10000).toLocaleTimeString([], { 
+        hour: '2-digit', minute: '2-digit', second: '2-digit' 
+      }),
+    };
+  });
 }

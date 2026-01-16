@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { MapContainer, TileLayer, Polygon, CircleMarker, Tooltip, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon,Marker, CircleMarker, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import signalsLogo from "../assets/images/UnitLogo3.png"
-
+ import jeepIconImg from "../assets/images/jeep.png";
 
 // Data from your KML
 const hierarchy = {
@@ -57,59 +57,114 @@ function MapController({ activeUnit }) {
   map.setView(view.center, view.zoom, { animate: true, duration: 1.5 });
   return null;
 }
+const jeepIcon = new L.Icon({
+  iconUrl: jeepIconImg,
+  iconSize: [58, 58],
+  iconAnchor: [24, 24],
+  popupAnchor: [0, -14],
+});
+const truckIcon = new L.Icon({
+  iconUrl:jeepIconImg,
+  iconSize: [58, 58],
+  iconAnchor: [24, 24],
+  popupAnchor: [0, -14],
+});
+const fleetData = {
+  "BA-4501": { unit: "41 Sig Unit", type: "Single Cabin" },
+  "BA-8822": { unit: "55 Fd Arty", type: "Double Cabin" },
+  "BA-1203": { unit: "13 Engr", type: "5 Ton" },
+  "BA-9944": { unit: "8 PR", type: "Single Cabin" },
+  "BA-3315": { unit: "8 SR", type: "5 Ton" },
+  "BA-7766": { unit: "33 SR", type: "Double Cabin" },
+  "BA-1077": { unit: "10 PR", type: "Single Cabin" },
+  "BA-9708": { unit: "97 Ord", type: "5 Ton" },
+  "BA-5909": { unit: "59 S&T", type: "5 Ton" },
+};
+const generateVehiclesForAOR = (locations) => {
+  const offsets = [
+    [0.01, 0.01],
+    [-0.01, 0.008],
+    [0.008, -0.01],
+    [-0.008, -0.008],
+    [0.012, 0],
+    [0, 0.012],
+  ];
 
+  return Object.entries(fleetData).map(([ba, veh], idx) => {
+    const base = locations[idx % locations.length].pos;
+    const off = offsets[idx % offsets.length];
+    return {
+      ba,
+      ...veh,
+      pos: [base[0] + off[0], base[1] + off[1]],
+    };
+  });
+};
 export default function BlinkingTacticalMap() {
   const [activeUnit, setActiveUnit] = useState("34 DIV");
+const vehiclesByAOR = {};
+  Object.entries(hierarchy).forEach(([unit, data]) => {
+    vehiclesByAOR[unit] = generateVehiclesForAOR(data.locations);
+  });
 
   return (
     <div className="vh-100 vw-100 bg-dark position-relative overflow-hidden">
       
       {/* TOP NAV BAR */}
-      <div className="position-absolute  top-0 start-0 w-100  " style={{ zIndex: 1000 }}>
-        <div className="d-flex align-items-center justify-content-between px-2 py-2  shadow-lg border border-secondary" 
-             style={{ background: 'rgba(0, 0, 0, 0.95)', backdropFilter: 'blur(10px)' }}>
-          
-          <div className="d-flex align-items-center gap-2">
-            <div className="border-end border-secondary px-4">
-              <h6 className="text-success fw-bold mb-0">34 DIV AOR</h6>
-              {/* <small className="text-white" style={{ fontSize: '9px' }}>MAP</small> */}
-            </div>
-
-            <div className="d-flex gap-2">
-              {Object.keys(hierarchy).reverse().map((unit) => (
-                <button
-                  key={unit}
-                  onClick={() => setActiveUnit(unit)}
-                  className={`btn btn-sm px-3 py-2 rounded-2 d-flex align-items-center gap-2 transition-all ${
-                    activeUnit === unit ? 'bg-success text-white shadow' : 'text-secondary border-0'
-                  }`}
-                  style={{ fontSize: '11px', fontWeight: '700' }}
-                >
-                  <div className={activeUnit === unit ? "blink-dot" : ""} style={{ 
-                    width: '8px', height: '8px', borderRadius: '50%', 
-                    backgroundColor: activeUnit === unit ? '#fff' : hierarchy[unit].color 
-                  }}></div>
-                  {unit}
-                </button>
-              ))}
-            </div>
-             <div className="d-flex justify-content-end px-1 py-2" style={{ width: "300px" }}>
-  <img 
-    src={signalsLogo} 
-    alt="41 Signals" 
-    style={{ 
-      height: "30px", 
-      objectFit: "contain",
-      // This makes the image completely black and white
-      filter: "grayscale(100%) brightness(0) invert(1)", 
-      // Optional: use "contrast(1.5)" if the details are blurry
-      opacity: 0.8 // Makes it look more integrated into the UI
-    }} 
-  />
-</div>
-          </div>
-        </div>
+ {/* TOP NAV BAR */}
+<div className="position-absolute top-0 start-0 w-100" style={{ zIndex: 1000 }}>
+  {/* The 'vw-100' and 'overflow-hidden' on the parent container (BlinkingTacticalMap) 
+      combined with 'w-100' here ensures the bar never exceeds the screen width. */}
+  <div className="d-flex align-items-center justify-content-between px-3 py-2 shadow-lg border-bottom border-secondary" 
+       style={{ 
+         background: 'rgba(0, 0, 0, 0)', 
+         backdropFilter: 'blur(2px)', 
+         width: '100%',
+         height: '60px' 
+       }}>
+    
+    {/* LEFT SECTION: Title and Unit Selection */}
+    <div className="d-flex align-items-center gap-3 overflow-hidden">
+      <div className="border-end border-black border-2 pe-3 flex-shrink-0">
+        {/* <h6 className="text-success fw-bold mb-0">34 DIV AOR</h6> */}
+        <img 
+        src={signalsLogo} 
+        alt="41 Signals" 
+        style={{ 
+          height: "35px", 
+          objectFit: "contain",
+          filter: "grayscale(100%) brightness(100) invert(1)", 
+          // opacity: 
+        }} 
+      />
       </div>
+
+      {/* Button Group */}
+      <div className="d-flex gap-2  no-scrollbar">
+        {Object.keys(hierarchy).reverse().map((unit) => (
+          <button
+            key={unit}
+            onClick={() => setActiveUnit(unit)}
+            className={`btn btn-sm px-3 py-2 rounded-2 d-flex align-items-center gap-2 flex-shrink-0 transition-all ${
+              activeUnit === unit ? 'bg-success text-white shadow' : 'text-secondary border-0'
+            }`}
+            style={{ fontSize: '11px', fontWeight: '700' }}
+          >
+            <div className={activeUnit === unit ? "blink-dot" : ""} style={{ 
+              width: '8px', height: '8px', borderRadius: '50%', 
+              backgroundColor: activeUnit === unit ? '#fff' : hierarchy[unit].color 
+            }}></div>
+            {unit}
+          </button>
+        ))}
+         
+      </div>
+    </div>
+
+    {/* RIGHT SECTION: Logo */}
+   
+  </div>
+</div>
 
       <MapContainer 
         center={[32.5, 73.0]} 
@@ -161,6 +216,26 @@ export default function BlinkingTacticalMap() {
               ))}
             </React.Fragment>
           );
+        })}
+          {Object.entries(vehiclesByAOR).map(([unit, vehicles]) => {
+          const isVisible = activeUnit === "34 DIV" || activeUnit === unit;
+          if (!isVisible) return null;
+
+          return vehicles.map((veh) => (
+            <Marker
+              key={veh.ba}
+              position={veh.pos}
+              icon={veh.type.includes("5 Ton") ? truckIcon : jeepIcon}
+            >
+              <Tooltip>
+                <strong>{veh.ba}</strong>
+                <br />
+                {veh.type}
+                <br />
+                {veh.unit}
+              </Tooltip>
+            </Marker>
+          ));
         })}
       </MapContainer>
 

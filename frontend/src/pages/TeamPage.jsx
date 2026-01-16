@@ -52,13 +52,13 @@ export default function TeamPage() {
     <div className="card  shadow-sm overflow-hidden" style={{ borderRadius: '10px' }}>
       <div className="row g-0 align-items-center">
         {/* LEFT SIDE: CO IMAGE */}
-        <div className="col-md-2 m-2 d-flex align-items-center  justify-content-center" style={{ minHeight: '180px' }}>
+        <div className="col-md-2  ms-3  d-flex align-items-center  justify-content-center" style={{ minHeight: '180px' }}>
           <img 
-          className="rounded-circle  "
+          className="rounded-2"
             src={coImage} // Replace with your variable for the CO's photo
             alt="Lt Col Karrar Hussain" 
             style={{ 
-              width: '100%', 
+              width: '90%', 
               height: '100%', 
               objectFit: 'cover',
               maxHeight: '220px',
@@ -70,10 +70,10 @@ export default function TeamPage() {
         <div className="col-md-9 p-4 bg-white ">
           <h3 className="fw-bold mb-0 text-dark h4">Lt Col Karrar Hussain</h3>
           <p className="text-primary fw-bold text-uppercase mb-2" style={{ fontSize: '0.85rem' }}>
-            CO 41 Signals Unit
+            CO 41 Signals Bn
           </p>
           <p className="text-dark mb-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
-              On the direction of <strong>Maj Gen Amjad Aziz Moghal(GOC 34 Div)</strong>, Lt Col Karrar Hussain(CO 41 Sigs), designed the architecture for an IP-based, 4G-enabled Vehicle Management System (VMS) to facilitate real-time tracking and monitoring of vehicles along with other operational parameters.
+              On the dir of <strong>Maj Gen Amjad Aziz Moghal(GOC 34 Div)</strong>, Lt Col Karrar Hussain(CO 41 Sigs), designed the architecture for an IP-based, 4G-enabled Veh mgmt sys (VMS) to facilitate real-time tracking and monitoring of veh along with other op parameters.
           </p>
         </div>
       </div>
