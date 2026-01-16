@@ -3,6 +3,9 @@ import { MapContainer, TileLayer, Polygon,Marker, CircleMarker, Tooltip, useMap 
 import "leaflet/dist/leaflet.css";
 import signalsLogo from "../assets/images/UnitLogo3.png"
  import jeepIconImg from "../assets/images/jeep.png";
+ import Ton5Img from "../assets/images/5Ton.png";
+
+ 
 
 // Data from your KML
 const hierarchy = {
@@ -59,13 +62,13 @@ function MapController({ activeUnit }) {
 }
 const jeepIcon = new L.Icon({
   iconUrl: jeepIconImg,
-  iconSize: [58, 58],
+  iconSize: [38, 38],
   iconAnchor: [24, 24],
   popupAnchor: [0, -14],
 });
 const truckIcon = new L.Icon({
-  iconUrl:jeepIconImg,
-  iconSize: [58, 58],
+  iconUrl:Ton5Img,
+  iconSize: [38, 38],
   iconAnchor: [24, 24],
   popupAnchor: [0, -14],
 });
@@ -186,7 +189,7 @@ const vehiclesByAOR = {};
                 <Polygon 
                   positions={data.locations.map(l => l.pos)}
                   pathOptions={{
-                    color: data.color,
+                    color: isVisible ? data.color : '#888',
                     fillColor: isVisible ? data.color : 'transparent',
                     fillOpacity: activeUnit === unitName ? 0.15 : 0.05,
                     weight: isVisible ? 2 : 1,

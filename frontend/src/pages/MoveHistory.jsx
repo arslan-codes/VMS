@@ -2,16 +2,19 @@ import React, { useState, useEffect, useRef } from "react";
 import { Play, Pause, RotateCcw, Zap, Clock, Truck, ChevronRight, ChevronLeft, Search, Filter } from "lucide-react";
 import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
+ import jeepIconImg from "../assets/images/jeep.png";
+ import Ton5Img from "../assets/images/5Ton.png";
+
 
 // Custom Icon Logic for different Vehicle Types
 const getVehicleIcon = (type) => {
   const iconUrl = type === "5 Ton" 
-    ? "https://cdn-icons-png.flaticon.com/512/2555/2555013.png" // Truck icon
-    : "https://cdn-icons-png.flaticon.com/512/3202/3202926.png"; // Jeep/Pickup icon
+    ? Ton5Img // Truck icon
+    : jeepIconImg; // Jeep/Pickup icon
   
   return new L.Icon({
     iconUrl,
-    iconSize: [32, 32],
+    iconSize: [52, 52],
     iconAnchor: [16, 16],
   });
 };

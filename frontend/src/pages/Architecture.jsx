@@ -93,15 +93,22 @@ export default function Architecture() {
             <div className="row g-4 small text-secondary">
               <div className="col-md-4">
                 <strong className="text-white">1. Multi-Path Ingestion:</strong> 
+                <p>
                 Field assets transmit simultaneously to two distinct IP nodes, ensuring high availability of telemetry even during link failure.
+             </p>
               </div>
               <div className="col-md-4">
                 <strong className="text-white">2. Localized Persistence:</strong> 
-                Each command node maintains its own database, allowing for independent operation and rapid local access to tactical history.
+                <p>
+  Each command node maintains its own database, allowing for independent operation and rapid local access to tactical history.
+                </p>
+
               </div>
               <div className="col-md-4">
                 <strong className="text-white">3. Decoupled Dashboard:</strong> 
-                The React-based frontend connects to the nearest node, providing real-time data visualization via WebSockets or REST.
+                <p>
+                  Real-time data visualization is handled by a separate frontend, reducing load on command nodes and enhancing scalability.
+                </p>
               </div>
             </div>
           </div>
