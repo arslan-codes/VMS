@@ -4,10 +4,10 @@ import StatHeader from "./components/StatHeader";
 
 // Import your page components
 import AlertsPage from "./pages/AlertsPage";
-import AssetRegistry from "./pages/MoveSanction";
+import AssetRegistry from "./pages/MoveSanction"; // Mapping AssetRegistry to MoveSanction
 import FleetStatus from "./pages/FleetStatus";
 import MileageReport from "./pages/MileageReport";
-import HistoryView from "./pages/MoveHistory";
+import HistoryView from "./pages/MoveHistory"; // Mapping HistoryView to MoveHistory
 import DashboardMap from "./pages/DashboardMap";
 import NightMove from "./pages/NightMove";
 import PanicList from "./pages/PanicList";
@@ -48,15 +48,20 @@ export default function App() {
     }
   };
 
+  // Logic to determine if header should be shown
+  // We hide it if activePage is "dashboard" OR "rd_team"
+  const hideHeader = activePage === "dashboard" || activePage === "rd_team";
+
   return (
     <div className="d-flex" style={{ height: "100vh", overflow: "hidden" }}>
+      {/* Sidebar - Passes the setter function to update App state */}
       <Sidebar active={activePage} setActive={setActivePage} />
       
       <div className="flex-grow-1 d-flex flex-column bg-light">
         
         {/* CONDITIONALLY HIDE HEADER */}
-        {/* If the activePage is NOT 'dashboard', show the StatHeader */}
-        {activePage !== "dashboard" && <StatHeader />}
+        {/* Only render StatHeader if hideHeader is false */}
+        {!hideHeader && <StatHeader />}
         
         <main className="flex-grow-1 overflow-auto">
           {renderContent()}

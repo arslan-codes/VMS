@@ -1,5 +1,5 @@
 import React from "react";
-import { Code, ShieldCheck, UserCheck } from "lucide-react";
+import { Bold, Code, ShieldCheck, UserCheck } from "lucide-react";
 
 import divLogo from "../assets/images/divlogo.png";
 import signalsLogo from "../assets/images/UnitLogo3.png";
@@ -12,6 +12,7 @@ import teamPhoto5 from "../assets/images/w5.jpeg";
 import teamPhoto6 from "../assets/images/w7.jpeg";
 import teamPhoto7 from "../assets/images/w2.jpg";
 import teamPhoto8 from "../assets/images/w9.jpeg";
+import coImage from "../assets/images/CO.jpeg"
 
 export default function TeamPage() {
   const images = [teamPhoto8, teamPhoto7, teamPhoto6, teamPhoto5, teamPhoto, teamPhoto1, teamPhoto2];
@@ -23,14 +24,14 @@ export default function TeamPage() {
       <div className="d-flex justify-content-between align-items-center mb-4 px-5">
         <img src={divLogo} alt="34 DIV HQ" style={{ height: "60px", objectFit: "contain" }} />
         <div className="text-center">
-          <h2 className="fw-bold mb-0 text-dark" style={{ letterSpacing: '-1px' }}>Research & Development</h2>
-          <p className="text-success tracking-widest text-uppercase fw-bold small mb-0">41 Signals Unit | 34 DIV Tactical Project</p>
+          <h2 className="fw-bold mb-0 text-dark text-uppercase" style={{ letterSpacing: '-1px' }}>34 Div R&D Cell</h2>
+          <p className="text-success tracking-widest text-uppercase fw-bold small mb-0">4g Enabled VMS</p>
         </div>
         <img src={signalsLogo} alt="41 Signals" style={{ height: "60px", objectFit: "contain" }} />
       </div>
 
       {/* 2. Full Width Patron Card (Lt Col Karrar) */}
-      <div className="row justify-content-center mb-3">
+      {/* <div className="row justify-content-center mb-3">
         <div className="col-lg-11">
           <div className="card border-0 shadow-sm overflow-hidden" style={{ borderRadius: '15px' }}>
             <div className="row g-0 align-items-center">
@@ -38,18 +39,47 @@ export default function TeamPage() {
                 <h3 className="fw-bold mb-0 text-dark h4">Lt Col Karrar Hussain</h3>
                 <p className="text-primary fw-bold text-uppercase mb-2" style={{ fontSize: '0.85rem' }}>CO 41 Signals Unit</p>
                 <p className="text-dark mb-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                  Conceived the vision for an IP-based 4G VMS arch 
-                  to bridge the gap in tactical veh oversight, providing the strategic for the trans
-                   from SMS-based sys to a high-speed, 4G-enabled RT net.
-                   {/* please write the military abbreviarions for this Conceived the vision for an IP-based 4G VMS architecture to bridge the gap in tactical vehicle oversight, 
-                   providing the strategic roadmap for the transition from SMS-based systems to a high-speed, 4G-enabled real-time network. */}
+                  On the direction of Maj Gen Amjad Aziz Moghal, GOC 34 Div, Lt Col Karrar Hussain, CO 41 Sigs, designed the architecture for an IP-based, 4G-enabled Vehicle Management System (VMS) to facilitate real-time tracking and monitoring of vehicles along with other operational parameters.
+                   
                 </p>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
+<div className="row justify-content-center mb-3 ">
+  <div className="col-lg-11 ">
+    <div className="card  shadow-sm overflow-hidden" style={{ borderRadius: '10px' }}>
+      <div className="row g-0 align-items-center">
+        {/* LEFT SIDE: CO IMAGE */}
+        <div className="col-md-2 m-2 d-flex align-items-center  justify-content-center" style={{ minHeight: '180px' }}>
+          <img 
+          className="rounded-circle  "
+            src={coImage} // Replace with your variable for the CO's photo
+            alt="Lt Col Karrar Hussain" 
+            style={{ 
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'cover',
+              maxHeight: '220px',
+            }} 
+          />
+        </div>
 
+        {/* RIGHT SIDE: TEXT CONTENT */}
+        <div className="col-md-9 p-4 bg-white ">
+          <h3 className="fw-bold mb-0 text-dark h4">Lt Col Karrar Hussain</h3>
+          <p className="text-primary fw-bold text-uppercase mb-2" style={{ fontSize: '0.85rem' }}>
+            CO 41 Signals Unit
+          </p>
+          <p className="text-dark mb-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              On the direction of <strong>Maj Gen Amjad Aziz Moghal(GOC 34 Div)</strong>, Lt Col Karrar Hussain(CO 41 Sigs), designed the architecture for an IP-based, 4G-enabled Vehicle Management System (VMS) to facilitate real-time tracking and monitoring of vehicles along with other operational parameters.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
       {/* 3. Carousel Section */}
       <div className="row justify-content-center mb-4">
         <div className="col-lg-11">
@@ -87,7 +117,7 @@ export default function TeamPage() {
 
             {/* Persistent Bottom Label */}
             <div className="position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75 text-white text-center" style={{ zIndex: 10 }}>
-              <span className="fw-bold small px-3 tracking-widest text-uppercase">41 SIGNALS R&D CELL</span>
+              <span className="fw-bold small px-3 tracking-widest  ">41 SIGs R&D CELL</span>
             </div>
           </div>
         </div>

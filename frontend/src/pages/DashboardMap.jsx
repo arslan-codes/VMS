@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { MapContainer, TileLayer, Polygon, CircleMarker, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import signalsLogo from "../assets/images/UnitLogo3.png"
+
 
 // Data from your KML
 const hierarchy = {
@@ -63,14 +65,14 @@ export default function BlinkingTacticalMap() {
     <div className="vh-100 vw-100 bg-dark position-relative overflow-hidden">
       
       {/* TOP NAV BAR */}
-      <div className="position-absolute top-0 start-0 w-75 p-3" style={{ zIndex: 1000 }}>
-        <div className="d-flex align-items-center justify-content-between px-4 py-2 rounded-3 shadow-lg border border-secondary" 
-             style={{ background: 'rgba(10, 15, 25, 0.95)', backdropFilter: 'blur(10px)' }}>
+      <div className="position-absolute  top-0 start-0 w-100  " style={{ zIndex: 1000 }}>
+        <div className="d-flex align-items-center justify-content-between px-2 py-2  shadow-lg border border-secondary" 
+             style={{ background: 'rgba(0, 0, 0, 0.95)', backdropFilter: 'blur(10px)' }}>
           
-          <div className="d-flex align-items-center gap-4">
-            <div className="border-end border-secondary pe-4">
+          <div className="d-flex align-items-center gap-2">
+            <div className="border-end border-secondary px-4">
               <h6 className="text-success fw-bold mb-0">34 DIV AOR</h6>
-              <small className="text-white" style={{ fontSize: '9px' }}>MAP</small>
+              {/* <small className="text-white" style={{ fontSize: '9px' }}>MAP</small> */}
             </div>
 
             <div className="d-flex gap-2">
@@ -91,6 +93,20 @@ export default function BlinkingTacticalMap() {
                 </button>
               ))}
             </div>
+             <div className="d-flex justify-content-end px-1 py-2" style={{ width: "300px" }}>
+  <img 
+    src={signalsLogo} 
+    alt="41 Signals" 
+    style={{ 
+      height: "30px", 
+      objectFit: "contain",
+      // This makes the image completely black and white
+      filter: "grayscale(100%) brightness(0) invert(1)", 
+      // Optional: use "contrast(1.5)" if the details are blurry
+      opacity: 0.8 // Makes it look more integrated into the UI
+    }} 
+  />
+</div>
           </div>
         </div>
       </div>
@@ -103,7 +119,6 @@ export default function BlinkingTacticalMap() {
       >
         {/* <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" /> */}
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
         <MapController activeUnit={activeUnit} />
 
         {Object.entries(hierarchy).map(([unitName, data]) => {
