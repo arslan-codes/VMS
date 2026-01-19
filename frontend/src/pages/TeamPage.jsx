@@ -25,7 +25,7 @@ export default function TeamPage() {
         <img src={divLogo} alt="34 DIV HQ" style={{ height: "60px", objectFit: "contain" }} />
         <div className="text-center">
           <h2 className="fw-bold mb-0 text-dark text-uppercase" style={{ letterSpacing: '-1px' }}>34 Div R&D Cell</h2>
-          <p className="text-success tracking-widest text-uppercase fw-bold small mb-0">4g Enabled VMS</p>
+          {/* <p className="text-success tracking-widest text-uppercase fw-bold small mb-0">4g Enabled VMS</p> */}
         </div>
         <img src={signalsLogo} alt="41 Signals" style={{ height: "60px", objectFit: "contain" }} />
       </div>
@@ -54,7 +54,7 @@ export default function TeamPage() {
         {/* LEFT SIDE: CO IMAGE */}
         <div className="col-md-2  ms-3  d-flex align-items-center  justify-content-center" style={{ minHeight: '180px' }}>
           <img 
-          className="rounded-2"
+          className="rounded-circle"
             src={coImage} // Replace with your variable for the CO's photo
             alt="Lt Col Karrar Hussain" 
             style={{ 

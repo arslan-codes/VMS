@@ -1,63 +1,70 @@
-const net = require("net");
-const WebSocket = require("ws");
+const { SerialPort } = require('serialport');
+const { ReadlineParser } = require('@serialport/parser-readline');
 
-/* ================= CONFIG ================= */
-const TCP_PORT = 5000;
-const WS_PORT = 8080;
+const COM_PORT = 'COM11';
+const BAUD_RATE = 115200;
 
-/* ================= WEBSOCKET ================= */
-const wsServer = new WebSocket.Server({ port: WS_PORT });
+const port = new SerialPort({ path: COM_PORT, baudRate: BAUD_RATE });
+const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
-wsServer.on("connection", ws => {
-  console.log("Frontend connected via WebSocket");
-  ws.on("close", () => console.log("Frontend disconnected"));
-});
-
-console.log(`WebSocket Server running on port ${WS_PORT}`);
-
-console.log("Starting TCP Server...");
-console.log("Listening for incoming tracker connections...");
-console.log("=====================================");
-/* ================= PARSER ================= */
-function parseASCII(text) {
-  try {
-    const parts = text.replace("&&\\", "").trim().split(",");
-
-    return {
-      time: Date.now(),
-      imei: parts[1],
-      gpsFix: parts[6] === "A" ? "Valid" : "Invalid",
-      latitude: parseFloat(parts[7]),
-      longitude: parseFloat(parts[8]),
-      speed: parseFloat(parts[11])
-    };
-  } catch (err) {
-    console.error("Parse error:", err);
-    return null;
-  }
+function send(cmd) {
+    console.log(`\x1b[36m[SENDING]: ${cmd}\x1b[0m`);
+    port.write(`${cmd}\r\n`);
 }
 
-/* ================= TCP SERVER ================= */
-const tcpServer = net.createServer(socket => {
-  console.log("Tracker connected:", socket.remoteAddress);
+// State tracker to prevent command collision
+let isNetworkReady = false;
 
-  socket.on("data", data => {
-    const raw = data.toString().trim();
-    console.log("RAW:", raw);
+function setupGateway() {
+    console.log(`\n\x1b[44m  RE-INITIALIZING TACTICAL LINK...  \x1b[0m\n`);
+    isNetworkReady = false;
+    send("AT+QIDEACT=1"); // Kill any old/stuck context
+    setTimeout(() => send('AT+CGDCONT=1,"IP","ufone.corporate"'), 2000);
+    setTimeout(() => send("AT+QIACT=1"), 4000);
+    setTimeout(() => send('AT+QIOPEN=1,0,"TCP LISTENER","127.0.0.1",0,5000,2'), 7000);
+}
 
-    const parsed = parseASCII(raw);
-    if (!parsed) return;
-
-    wsServer.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(parsed));
-      }
-    });
-  });
-
-  socket.on("close", () => console.log("Tracker disconnected"));
+port.on('open', () => {
+    console.log(`\x1b[32m[SUCCESS]: COM11 Connected.\x1b[0m`);
+    setupGateway();
 });
 
-tcpServer.listen(TCP_PORT, () =>
-  console.log(`TCP Server running on port ${TCP_PORT}`)
-);
+parser.on('data', (line) => {
+    const raw = line.trim();
+    if (!raw) return;
+
+    console.log(`\x1b[90m[MODEM]: ${raw}\x1b[0m`);
+
+    // --- 1. HANDLE NETWORK DROP ---
+    if (raw.includes("pdpdeact")) {
+        console.log("\x1b[31m[CRITICAL]: Network Deactivated by Tower. Reconnecting...\x1b[0m");
+        setupGateway();
+    }
+
+    // --- 2. SUCCESSFUL ACTIVATION ---
+    if (raw.includes("+QIOPEN: 0,0")) {
+        isNetworkReady = true;
+        console.log("\x1b[42m\x1b[30m SYSTEM LIVE \x1b[0m Listening for Assets...");
+    }
+
+    // --- 3. DATA PUSH DETECTION ---
+    if (raw.includes('+QIURC: "recv"')) {
+        console.log(`\x1b[35m[INCOMING]: Data Payload arriving...\x1b[0m`);
+    }
+
+    // --- 4. CAPTURE DATA PACKET ---
+    if (raw.includes("&&")) {
+        console.log(`\n\x1b[43m\x1b[30m GPS DATA RECEIVED \x1b[0m`);
+        console.log(`\x1b[33m${raw}\x1b[0m\n`);
+    }
+
+    // --- 5. KEEP ALIVE (If we see OK and we are live, do nothing, otherwise keep pulse) ---
+});
+
+// HEARTBEAT: Send a pulse every 30 seconds to prevent "pdpdeact"
+setInterval(() => {
+    if (isNetworkReady) {
+        // Just a simple signal check to keep the tower happy
+        port.write("AT+CSQ\r\n"); 
+    }
+}, 30000);
