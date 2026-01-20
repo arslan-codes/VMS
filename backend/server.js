@@ -1,210 +1,77 @@
-/******************************************************************
- * EC20 TCP LISTENER GATEWAY – VT100 TRACKER RECEIVER (STABLE)
- ******************************************************************/
-
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
+const express = require('express');
+const { WebSocketServer } = require('ws');
+const path = require('path');
 
-const COM_PORT = 'COM11';
-const BAUD_RATE = 115200;
+// --- SERVER SETUP ---
+const app = express();
+const server = app.listen(3000, () => console.log('Dashboard: http://localhost:3000'));
+const wss = new WebSocketServer({ server });
 
-const port = new SerialPort({ path: COM_PORT, baudRate: BAUD_RATE });
+app.use(express.static(path.join(__dirname))); // Serve index.html
+
+function broadcast(data) {
+    wss.clients.forEach(client => {
+        if (client.readyState === 1) client.send(JSON.stringify(data));
+    });
+}
+
+// --- SERIAL SETUP ---
+const port = new SerialPort({ path: 'COM11', baudRate: 115200 });
 const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
 function send(cmd) {
     console.log(`\x1b[36m[SENDING]: ${cmd}\x1b[0m`);
-    port.write(cmd + '\r\n');
+    port.write(`${cmd}\r\n`);
 }
 
+// --- VT100 PARSER ---
+function parseVT100(raw) {
+    try {
+        const startIndex = raw.indexOf("&&") + 3;
+        const body = raw.substring(startIndex);
+        const p = body.split(',');
+        if (p.length < 12) return null;
+
+        return {
+            imei: p[1],
+            time: `20${p[5].substring(0,2)}-${p[5].substring(2,4)}-${p[5].substring(4,6)} ${p[5].substring(6,8)}:${p[5].substring(8,10)}`,
+            lat: parseFloat(p[7]),
+            lng: parseFloat(p[8]),
+            speed: p[10],
+            status: p[6] === 'A' ? 'Active' : 'Searching'
+        };
+    } catch (e) { return null; }
+}
+
+// --- MODEM LOGIC ---
 let isNetworkReady = false;
-let recvBuffer = "";
-let initInProgress = false;
-
-/* =========================================================
-   VT100 PACKET PARSER
-   ========================================================= */
-
-function parseVT100Packet(packet) {
-    if (!packet.startsWith("&&>")) {
-        throw new Error("Invalid VT100 packet header");
-    }
-
-    const payload = packet.replace("&&>", "");
-    const fields = payload.split(",");
-
-    if (fields.length < 23) {
-        throw new Error("Incomplete VT100 packet");
-    }
-
-    const dt = fields[5];
-    const year = "20" + dt.substring(4, 6);
-    const month = dt.substring(2, 4);
-    const day = dt.substring(0, 2);
-    const hour = dt.substring(6, 8);
-    const minute = dt.substring(8, 10);
-    const second = dt.substring(10, 12);
-
-    return {
-        imei: fields[1],
-        timestamp: `${year}-${month}-${day} ${hour}:${minute}:${second}`,
-        gpsStatus: fields[6] === "A" ? "VALID" : "INVALID",
-        latitude: parseFloat(fields[7]),
-        longitude: parseFloat(fields[8]),
-        speedKmh: Number(fields[9]),
-        hdop: parseFloat(fields[10]),
-        altitude: Number(fields[11]),
-        course: Number(fields[12]),
-        satellites: Number(fields[13]),
-        gsmSignal: Number(fields[16]),
-        accStatus: fields[18] === "01" ? "ON" : "OFF",
-        chargingStatus: fields[19] === "01" ? "ON" : "OFF",
-        cellInfo: fields[15],
-        ioStatus: fields[20],
-        packetIndex: fields[21]
-    };
-}
-
-/* =========================================================
-   NETWORK INITIALIZATION (EC20 SAFE VERSION)
-   ========================================================= */
-
 function setupGateway() {
-    if (initInProgress) return;
-    initInProgress = true;
-
-    console.log(`\n\x1b[44m  RE-INITIALIZING TACTICAL LINK...  \x1b[0m\n`);
-
     isNetworkReady = false;
-    recvBuffer = "";
-
-    // Step 0: Deactivate any old context
-    send("AT+QIDEACT=1");
-
-    // Step 1: Set APN
-    setTimeout(() => {
-        send('AT+CGDCONT=1,"IP","ufone.corporate"');
-    }, 1500);
-
-    // Step 2: Activate PDP
-    setTimeout(() => {
-        send("AT+QIACT=1");
-    }, 4000);
-
-    // Step 3: Confirm IP ready
-    setTimeout(() => {
-        send("AT+QIACT?");
-    }, 7000);
-
-    // Step 4: Open TCP LISTENER on fixed port 5000
-    setTimeout(() => {
-        send('AT+QIOPEN=1,0,"TCP LISTENER","0.0.0.0",5000,5000,2');
-    }, 10000);
+    send("AT+QIDEACT=1"); 
+    setTimeout(() => send('AT+CGDCONT=1,"IP","ufone.corporate"'), 2000);
+    setTimeout(() => send("AT+QIACT=1"), 5000);
+    setTimeout(() => send('AT+QIOPEN=1,0,"TCP LISTENER","0.0.0.0",0,5000,2'), 9000);
 }
 
-/* =========================================================
-   SERIAL OPEN
-   ========================================================= */
-
-port.on('open', () => {
-    console.log(`\x1b[32m[SUCCESS]: ${COM_PORT} Connected.\x1b[0m`);
-    setupGateway();
-});
-
-/* =========================================================
-   MODEM RESPONSE HANDLER
-   ========================================================= */
+port.on('open', () => setupGateway());
 
 parser.on('data', (line) => {
     const raw = line.trim();
     if (!raw) return;
+    console.log(`[MODEM]: ${raw}`);
 
-    console.log(`\x1b[90m[MODEM]: ${raw}\x1b[0m`);
-
-    /* ---------- PDP DROPPED ---------- */
-
-    if (raw.includes('+QIURC: "pdpdeact"')) {
-        console.log("\x1b[31m[PDP DROPPED]: Network lost. Reinitializing...\x1b[0m");
-        initInProgress = false;
-        setTimeout(setupGateway, 3000);
-        return;
-    }
-
-    /* ---------- SOCKET CLOSED ---------- */
-
-    if (raw.includes('+QIURC: "closed",0')) {
-        console.log("\x1b[31m[SOCKET CLOSED]: Restarting gateway...\x1b[0m");
-        initInProgress = false;
-        setTimeout(setupGateway, 3000);
-        return;
-    }
-
-    /* ---------- SOCKET OPEN SUCCESS ---------- */
-
-    if (raw.includes("+QIOPEN: 0,0")) {
-        isNetworkReady = true;
-        initInProgress = false;
-        console.log("\x1b[42m\x1b[30m SYSTEM LIVE \x1b[0m Listening on port 5000...");
-        return;
-    }
-
-    /* ---------- SOCKET OPEN FAILURE ONLY ---------- */
-
-    if (raw.includes("+QIOPEN: 0,")) {
-        console.log("\x1b[31m[SOCKET OPEN FAILED]: Retrying in 5s...\x1b[0m");
-        initInProgress = false;
-        setTimeout(setupGateway, 5000);
-        return;
-    }
-
-    /* ---------- DATA ARRIVAL ---------- */
-
+    if (raw.includes("+QIOPEN: 0,0")) isNetworkReady = true;
+    
     if (raw.includes('+QIURC: "recv",0')) {
-        console.log(`\x1b[35m[INCOMING]: Data detected. Reading buffer...\x1b[0m`);
         send("AT+QIRD=0,1500");
-        return;
     }
-
-    /* ---------- IGNORE MODEM HEADERS ---------- */
-
-    if (raw.startsWith("+QIRD:")) return;
-    if (raw === "OK") return;
-    if (raw === "ERROR") return;   // DO NOT restart on generic ERROR
-
-    /* ---------- ACCUMULATE GPS DATA ---------- */
 
     if (raw.includes("&&")) {
-        recvBuffer += raw;
-
-        if (recvBuffer.includes(",0D")) {
-            const packet = recvBuffer.trim();
-            recvBuffer = "";
-
-            console.log(`\n\x1b[43m\x1b[30m GPS DATA RECEIVED \x1b[0m`);
-            console.log(`\x1b[33m${packet}\x1b[0m\n`);
-
-            // Send ACK
-            send("OK");
-
-            // Parse
-            try {
-                const parsed = parseVT100Packet(packet);
-                console.log("\x1b[32m[PARSED DATA]:\x1b[0m");
-                console.log(parsed);
-            } catch (e) {
-                console.error("\x1b[31m[PARSE ERROR]:\x1b[0m", e.message);
-            }
-        }
+        const data = parseVT100(raw);
+        if (data) broadcast(data); // Send to Webpage
     }
 });
 
-/* =========================================================
-   HEARTBEAT
-   ========================================================= */
-
-setInterval(() => {
-    if (isNetworkReady) {
-        send("AT+CSQ");
-
-        
-    }
-}, 30000);
+setInterval(() => { if (isNetworkReady) port.write("AT+CSQ\r\n"); }, 30000);

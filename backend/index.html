@@ -1,102 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical GPS Tracker</title>
+    <title>Tactical Tracker</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root { --neon-blue: #00d2ff; --bg-dark: #0a0b10; }
-        body { background: var(--bg-dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        /* Sidebar Styles */
-        #sidebar { width: 350px; background: #161b22; padding: 20px; border-right: 1px solid #30363d; z-index: 1000; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
-        .data-row { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .label { color: #8b949e; font-size: 0.7em; text-transform: uppercase; }
-        .value { font-size: 1.1em; color: var(--neon-blue); font-weight: bold; }
-        
-        /* Map Styles */
-        #map { flex-grow: 1; height: 100%; background: #0b0e14; }
-        
-        .status-badge { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 0.8em; }
-        .dot { height: 10px; width: 10px; background: #ff3e3e; border-radius: 50%; }
-        .dot.online { background: #39ff14; box-shadow: 0 0 10px #39ff14; }
+        body { margin: 0; display: flex; height: 100vh; background: #1a1a1a; color: white; font-family: sans-serif; }
+        #sidebar { width: 300px; padding: 20px; border-right: 1px solid #444; }
+        #map { flex: 1; }
+        .stat { margin-bottom: 20px; padding: 10px; background: #2a2a2a; border-radius: 5px; }
+        .label { color: #888; font-size: 12px; }
+        .val { font-size: 18px; color: #00ff41; font-family: monospace; }
     </style>
 </head>
 <body>
-
-<div id="sidebar">
-    <div class="status-badge">
-        <div id="statusDot" class="dot"></div>
-        <span id="statusText">MODEM DISCONNECTED</span>
+    <div id="sidebar">
+        <h2>📡 LIVE FEED</h2>
+        <div class="stat"><div class="label">IMEI</div><div id="imei" class="val">---</div></div>
+        <div class="stat"><div class="label">COORDINATES</div><div id="coords" class="val">0.0, 0.0</div></div>
+        <div class="stat"><div class="label">SPEED</div><div id="speed" class="val">0 km/h</div></div>
+        <div class="stat"><div class="label">LAST FIX</div><div id="time" class="val">---</div></div>
     </div>
+    <div id="map"></div>
 
-    <h2>VEHICLE INFO</h2>
-    <div class="data-row"><div class="label">IMEI</div><div id="imei" class="value">---</div></div>
-    <div class="data-row"><div class="label">Status</div><div id="status" class="value">---</div></div>
-    <div class="data-row"><div class="label">Speed</div><div id="speed" class="value">0 km/h</div></div>
-    <div class="data-row"><div class="label">Last Seen</div><div id="time" class="value">---</div></div>
-    <div class="data-row">
-        <div class="label">Coordinates</div>
-        <div class="value"><span id="lat">0.0</span>, <span id="lng">0.0</span></div>
-    </div>
-</div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Init Map
+        const map = L.map('map').setView([33.6844, 73.0479], 13); // Default to Islamabad
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-<div id="map"></div>
+        let marker = L.marker([0,0]).addTo(map);
+        let polyline = L.polyline([], {color: 'red'}).addTo(map);
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        // WebSocket Link
+        const ws = new WebSocket('ws://localhost:3000');
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            // Update UI
+            document.getElementById('imei').innerText = data.imei;
+            document.getElementById('coords').innerText = `${data.lat.toFixed(4)}, ${data.lng.toFixed(4)}`;
+            document.getElementById('speed').innerText = data.speed + " km/h";
+            document.getElementById('time').innerText = data.time;
 
-<script>
-    // 1. Initialize Map (Center on a default location)
-    const map = L.map('map').setView([33.77, 72.78], 13);
-
-    // 2. Add Dark Mode Map Tiles (CartoDB Dark Matter)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO'
-    }).addTo(map);
-
-    // 3. Create a Vehicle Marker
-    let vehicleMarker = L.marker([0, 0]).addTo(map);
-    let pathHistory = L.polyline([], {color: '#00d2ff', weight: 3}).addTo(map);
-
-    // 4. WebSocket Connection
-    const socket = new WebSocket('ws://' + window.location.host);
-
-    socket.onopen = () => {
-        document.getElementById('statusDot').className = 'dot online';
-        document.getElementById('statusText').innerText = 'LINK ACTIVE';
-    };
-
-    socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        
-        // Update Sidebar Text
-        document.getElementById('imei').innerText = data.imei;
-        document.getElementById('time').innerText = data.time;
-        document.getElementById('lat').innerText = data.lat.toFixed(6);
-        document.getElementById('lng').innerText = data.lng.toFixed(6);
-        document.getElementById('speed').innerText = data.speed + " km/h";
-        document.getElementById('status').innerText = data.status;
-
-        // Update Map Marker
-        const newPos = [data.lat, data.lng];
-        vehicleMarker.setLatLng(newPos);
-        
-        // Add to breadcrumb path
-        pathHistory.addLatLng(newPos);
-
-        // Auto-center map on vehicle
-        map.panTo(newPos);
-
-        // Update Popup
-        vehicleMarker.bindPopup(`<b>Vehicle: ${data.imei}</b><br>Speed: ${data.speed} km/h`).openPopup();
-    };
-
-    socket.onclose = () => {
-        document.getElementById('statusDot').className = 'dot';
-        document.getElementById('statusText').innerText = 'LINK LOST';
-    };
-</script>
-
+            // Update Map
+            const pos = [data.lat, data.lng];
+            marker.setLatLng(pos);
+            polyline.addLatLng(pos);
+            map.panTo(pos);
+        };
+    </script>
 </body>
 </html>
