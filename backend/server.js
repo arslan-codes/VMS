@@ -1,6 +1,5 @@
 /******************************************************************
- * EC20 TCP LISTENER GATEWAY – VT100 TRACKER RECEIVER
- * Stable version for single-tracker testing
+ * EC20 TCP LISTENER GATEWAY – VT100 TRACKER RECEIVER (STABLE)
  ******************************************************************/
 
 const { SerialPort } = require('serialport');
@@ -19,6 +18,7 @@ function send(cmd) {
 
 let isNetworkReady = false;
 let recvBuffer = "";
+let initInProgress = false;
 
 /* =========================================================
    VT100 PACKET PARSER
@@ -36,7 +36,6 @@ function parseVT100Packet(packet) {
         throw new Error("Incomplete VT100 packet");
     }
 
-    // Parse DateTime (DDMMYYHHMMSS)
     const dt = fields[5];
     const year = "20" + dt.substring(4, 6);
     const month = dt.substring(2, 4);
@@ -66,15 +65,19 @@ function parseVT100Packet(packet) {
 }
 
 /* =========================================================
-   NETWORK INITIALIZATION (STABLE SEQUENCE)
+   NETWORK INITIALIZATION (EC20 SAFE VERSION)
    ========================================================= */
 
 function setupGateway() {
+    if (initInProgress) return;
+    initInProgress = true;
+
     console.log(`\n\x1b[44m  RE-INITIALIZING TACTICAL LINK...  \x1b[0m\n`);
+
     isNetworkReady = false;
     recvBuffer = "";
 
-    // Hard reset network stack
+    // Step 0: Deactivate any old context
     send("AT+QIDEACT=1");
 
     // Step 1: Set APN
@@ -82,27 +85,20 @@ function setupGateway() {
         send('AT+CGDCONT=1,"IP","ufone.corporate"');
     }, 1500);
 
-    // Step 2: Configure TCP/IP modes (CRITICAL)
-    setTimeout(() => {
-        send("AT+QIMODE=0");                 // Buffer mode
-        send("AT+QIMUX=0");                  // Single socket
-        send('AT+QICFG="dataformat",0,0');   // Raw data
-    }, 3000);
-
-    // Step 3: Activate PDP context
+    // Step 2: Activate PDP
     setTimeout(() => {
         send("AT+QIACT=1");
-    }, 5000);
+    }, 4000);
 
-    // Step 4: Verify IP ready
+    // Step 3: Confirm IP ready
     setTimeout(() => {
         send("AT+QIACT?");
-    }, 8000);
+    }, 7000);
 
-    // Step 5: Open TCP LISTENER on FIXED PORT 5000
+    // Step 4: Open TCP LISTENER on fixed port 5000
     setTimeout(() => {
         send('AT+QIOPEN=1,0,"TCP LISTENER","0.0.0.0",5000,5000,2');
-    }, 11000);
+    }, 10000);
 }
 
 /* =========================================================
@@ -124,16 +120,20 @@ parser.on('data', (line) => {
 
     console.log(`\x1b[90m[MODEM]: ${raw}\x1b[0m`);
 
-    /* ---------- NETWORK DROP HANDLING ---------- */
+    /* ---------- PDP DROPPED ---------- */
 
     if (raw.includes('+QIURC: "pdpdeact"')) {
         console.log("\x1b[31m[PDP DROPPED]: Network lost. Reinitializing...\x1b[0m");
+        initInProgress = false;
         setTimeout(setupGateway, 3000);
         return;
     }
 
+    /* ---------- SOCKET CLOSED ---------- */
+
     if (raw.includes('+QIURC: "closed",0')) {
         console.log("\x1b[31m[SOCKET CLOSED]: Restarting gateway...\x1b[0m");
+        initInProgress = false;
         setTimeout(setupGateway, 3000);
         return;
     }
@@ -142,14 +142,16 @@ parser.on('data', (line) => {
 
     if (raw.includes("+QIOPEN: 0,0")) {
         isNetworkReady = true;
+        initInProgress = false;
         console.log("\x1b[42m\x1b[30m SYSTEM LIVE \x1b[0m Listening on port 5000...");
         return;
     }
 
-    /* ---------- SOCKET OPEN FAILURE ---------- */
+    /* ---------- SOCKET OPEN FAILURE ONLY ---------- */
 
-    if (raw.includes("+QIOPEN: 0,562") || raw.includes("+QIOPEN: 0,572") || raw === "ERROR") {
-        console.log("\x1b[31m[SOCKET ERROR]: Retrying gateway in 5s...\x1b[0m");
+    if (raw.includes("+QIOPEN: 0,")) {
+        console.log("\x1b[31m[SOCKET OPEN FAILED]: Retrying in 5s...\x1b[0m");
+        initInProgress = false;
         setTimeout(setupGateway, 5000);
         return;
     }
@@ -166,13 +168,13 @@ parser.on('data', (line) => {
 
     if (raw.startsWith("+QIRD:")) return;
     if (raw === "OK") return;
+    if (raw === "ERROR") return;   // DO NOT restart on generic ERROR
 
-    /* ---------- ACCUMULATE GPS DATA SAFELY ---------- */
+    /* ---------- ACCUMULATE GPS DATA ---------- */
 
     if (raw.includes("&&")) {
         recvBuffer += raw;
 
-        // VT100 packets normally end with ,0D
         if (recvBuffer.includes(",0D")) {
             const packet = recvBuffer.trim();
             recvBuffer = "";
@@ -180,10 +182,10 @@ parser.on('data', (line) => {
             console.log(`\n\x1b[43m\x1b[30m GPS DATA RECEIVED \x1b[0m`);
             console.log(`\x1b[33m${packet}\x1b[0m\n`);
 
-            // Send ACK to tracker
+            // Send ACK
             send("OK");
 
-            // Parse packet
+            // Parse
             try {
                 const parsed = parseVT100Packet(packet);
                 console.log("\x1b[32m[PARSED DATA]:\x1b[0m");
@@ -202,5 +204,7 @@ parser.on('data', (line) => {
 setInterval(() => {
     if (isNetworkReady) {
         send("AT+CSQ");
+
+        
     }
 }, 30000);
