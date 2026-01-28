@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import StatHeader from "./components/StatHeader";
-
+import { TrackingProvider } from './context/TrackingContext';
 // Import your page components
 import AlertsPage from "./pages/AlertsPage";
 import MoveSanction from "./pages/MoveSanction"; // Mapping AssetRegistry to MoveSanction
@@ -74,6 +74,7 @@ export default function App() {
   const hideHeader = activePage==="Active_move"  ||activePage === "dashboard" || activePage === "rd_team";
 
   return (
+    <TrackingProvider>
     <div className="d-flex" style={{ height: "100vh", overflow: "hidden" }}>
       {/* Sidebar - Passes the setter function to update App state */}
       <Sidebar active={activePage} setActive={setActivePage} />
@@ -87,6 +88,9 @@ export default function App() {
           {renderContent()}
         </main>
       </div>
+
     </div>
+    </TrackingProvider>
+
   );
 }
