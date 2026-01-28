@@ -1,78 +1,83 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const TrackingContext = createContext();
 
 export const TrackingProvider = ({ children }) => {
     const [mileageLogs, setMileageLogs] = useState([]);
-    const [liveData, setLiveData] = useState({}); // New state for continuous tracking
+    const [liveData, setLiveData] = useState({});
 
-    // 1. Fetch initial data from MySQL via the Node.js API
-    const fetchHistory = async () => {
+    /**
+     * 1. INITIAL DATA FETCH
+     * Fetches historical and current move data from move_history joined with vehicles/units.
+     */
+    const fetchHistory = useCallback(async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/reports/mileage');
+            const response = await fetch('http://localhost:5000/api/sidebar/move-history');
+            if (!response.ok) throw new Error("Network response was not ok");
+            
             const data = await response.json();
             
-            // Map the Relational MySQL columns (vehicle_no, unit_name) to UI columns
             const formatted = data.map(row => ({
-                ba: row.vehicle_no,         // Updated to match your new schema
-                unit: row.unit_name || "Unassigned",
-                startLat: row.start_lat,
-                startLng: row.start_lng,
-                lastLat: row.end_lat,
-                lastLng: row.end_lng,
-                total: row.total_distance || "0.00",
-                currentSpeed: "0 km/h",
-                status: row.status          // Tracking the 'ACTIVE' status from sanctions
+                ba: row.ba,
+                unit: row.unit || "N/A",
+                startLat: row.startLat,
+                startLng: row.startLng,
+                lastLat: row.lastLat,
+                lastLng: row.lastLng,
+                total: row.total || "0.00",
+                currentSpeed: row.currentSpeed ? `${row.currentSpeed} km/h` : "0 km/h"
             }));
+            
             setMileageLogs(formatted);
         } catch (err) {
-            console.error("Database Fetch Error:", err);
+            console.error("TrackingContext Fetch Error:", err);
         }
-    };
+    }, []);
 
+    /**
+     * 2. REAL-TIME UPDATES (WebSocket)
+     */
     useEffect(() => {
         fetchHistory(); 
 
-        // 2. WebSocket for Real-time Updates
         const socket = new WebSocket('ws://localhost:8080');
         
         socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
+            const incoming = JSON.parse(event.data);
 
-            // UPDATE LIVE TABLE STATE (For continuous tracking page)
+            // Update Live Assets (Map/Dashboard)
             setLiveData(prev => ({
                 ...prev,
-                [data.ba]: { 
-                    lat: data.lat, 
-                    lng: data.lng, 
-                    speed: data.speed, 
-                    unit: data.unit 
+                [incoming.ba]: { 
+                    lat: incoming.lat, 
+                    lng: incoming.lng, 
+                    speed: incoming.speed, 
+                    unit: incoming.unit 
                 }
             }));
 
-            // UPDATE MILEAGE REPORT STATE (Incremental update)
-            setMileageLogs(prev => {
-                const updated = [...prev];
-                const index = updated.findIndex(item => item.ba === data.ba);
-                
-                if (index !== -1) {
-                    updated[index] = {
-                        ...updated[index],
-                        lastLat: data.lat,
-                        lastLng: data.lng,
-                        total: (parseFloat(updated[index].total) + 0.01).toFixed(2),
-                        currentSpeed: data.speed + " km/h"
+            // Update Mileage Report Table (Live increment)
+            setMileageLogs(prev => prev.map(item => {
+                if (item.ba === incoming.ba) {
+                    return {
+                        ...item,
+                        lastLat: incoming.lat,
+                        lastLng: incoming.lng,
+                        // Incrementing distance based on 10s ping frequency (~0.01km)
+                        total: (parseFloat(item.total) + 0.01).toFixed(2),
+                        currentSpeed: `${incoming.speed} km/h`
                     };
                 }
-                return updated;
-            });
+                return item;
+            }));
         };
         
+        socket.onerror = (err) => console.error("WebSocket Error:", err);
         return () => socket.close();
-    }, []);
+    }, [fetchHistory]);
 
     return (
-        <TrackingContext.Provider value={{ mileageLogs, liveData }}>
+        <TrackingContext.Provider value={{ mileageLogs, liveData, refreshData: fetchHistory }}>
             {children}
         </TrackingContext.Provider>
     );

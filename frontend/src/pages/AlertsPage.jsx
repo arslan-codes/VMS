@@ -1,14 +1,38 @@
-import React from "react";
-import { AlertTriangle, ShieldAlert, Clock, CheckCircle, MapPin } from "lucide-react";
-
-const dummyAlerts = [
-  { id: 1, ba: "34-A-1234", type: "PANIC", severity: "CRITICAL", time: "10:15 AM", location: "Sector B-4", status: "Unresolved" },
-  { id: 2, ba: "19-GJ-2114", type: "OVERSPEED", value: "75 km/h", severity: "HIGH", time: "09:42 AM", location: "Main GT Road", status: "Pending" },
-  { id: 3, ba: "22-GJ-1109", type: "GEOFENCE EXIT", severity: "MEDIUM", time: "08:12 AM", location: "Garrison Gate 3", status: "Acknowledged" },
-  { id: 4, ba: "16-GL-0104", type: "NIGHT MOVE", severity: "HIGH", time: "02:00 AM", location: "Supply Route X", status: "Pending" },
-];
+import React, { useState, useEffect } from "react";
+import { AlertTriangle, ShieldAlert, Clock, CheckCircle, MapPin, Loader2 } from "lucide-react";
 
 export default function AlertsPage() {
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAlerts = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/sidebar/violations-alerts');
+      const data = await res.json();
+      setAlerts(data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Fetch alerts error:", err);
+      setLoading(false);
+    }
+  };
+
+  const resolveAlert = async (id) => {
+    // In a real app, you'd call a PUT/PATCH endpoint here
+    // For now, we'll filter it out locally to show the UI response
+    setAlerts(prev => prev.filter(a => a.alert_id !== id));
+    alert(`Alert ${id} marked as resolved in HQ Log.`);
+  };
+
+  useEffect(() => {
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Calculate stats from live data
+  const criticalCount = alerts.filter(a => a.alert_type === 'SOS_TRIGGER' || a.alert_type === 'GEOFENCE_EXIT').length;
+
   return (
     <div className="p-4" style={{ animation: "fadeIn 0.4s ease-out" }}>
       {/* Header Section */}
@@ -18,21 +42,25 @@ export default function AlertsPage() {
           <p className="text-muted small mb-0">Live log of disciplinary and security breaches across all units.</p>
         </div>
         <div className="d-flex gap-2">
-          <button className="btn btn-outline-danger btn-sm px-3">Clear Resolved</button>
+          <button className="btn btn-outline-danger btn-sm px-3" onClick={fetchAlerts}>Refresh Feed</button>
           <button className="btn btn-dark btn-sm px-3">Download Log</button>
         </div>
       </div>
 
       {/* Summary Cards */}
       <div className="row g-3 mb-4">
-        {['Critical', 'Pending', 'Resolved'].map((stat, i) => (
+        {[
+          { label: 'Critical', count: criticalCount, color: 'text-danger', icon: <ShieldAlert size={18}/> },
+          { label: 'Active', count: alerts.length, color: 'text-primary', icon: <Clock size={18}/> },
+          { label: 'Units Flagged', count: [...new Set(alerts.map(a => a.unit))].length, color: 'text-warning', icon: <AlertTriangle size={18}/> }
+        ].map((stat, i) => (
           <div className="col-md-4" key={i}>
             <div className="card border-0 shadow-sm p-3">
               <div className="d-flex justify-content-between align-items-center">
-                <span className="text-muted small fw-bold text-uppercase">{stat} Alerts</span>
-                {i === 0 ? <ShieldAlert className="text-danger" size={18} /> : <Clock className="text-primary" size={18} />}
+                <span className="text-muted small fw-bold text-uppercase">{stat.label}</span>
+                <span className={stat.color}>{stat.icon}</span>
               </div>
-              <div className="fs-3 fw-bold">{i === 0 ? "04" : i === 1 ? "12" : "85"}</div>
+              <div className="fs-3 fw-bold">{String(stat.count).padStart(2, '0')}</div>
             </div>
           </div>
         ))}
@@ -45,50 +73,58 @@ export default function AlertsPage() {
             <thead className="bg-light">
               <tr className="text-muted small text-uppercase" style={{ fontSize: '11px' }}>
                 <th className="ps-4">Timestamp</th>
-                <th>BA Number</th>
+                <th>BA Number / Unit</th>
                 <th>Violation Type</th>
-                <th>Location</th>
-                <th>Severity</th>
+                <th>Details</th>
                 <th>Status</th>
-                <th className="text-end pe-4">Actions</th>
+                {/* <th className="text-end pe-4">Actions</th> */}
               </tr>
             </thead>
             <tbody>
-              {dummyAlerts.map((alert) => (
-                <tr key={alert.id} style={{ fontSize: '14px' }}>
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-5"><Loader2 className="animate-spin" /></td>
+                </tr>
+              ) : alerts.length > 0 ? alerts.map((alert) => (
+                <tr key={alert.alert_id} style={{ fontSize: '14px' }}>
                   <td className="ps-4 text-muted">
-                    <div className="d-flex align-items-center gap-2">
-                      <Clock size={14} /> {alert.time}
-                    </div>
-                  </td>
-                  <td className="fw-bold text-dark">{alert.ba}</td>
-                  <td>
-                    <div className="d-flex align-items-center gap-2">
-                      <AlertTriangle size={16} className={alert.severity === 'CRITICAL' ? 'text-danger' : 'text-warning'} />
-                      <span>{alert.type} {alert.value && `(${alert.value})`}</span>
+                    <div className="small">
+                      {new Date(alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </td>
                   <td>
-                    <div className="d-flex align-items-center gap-2 text-muted">
-                      <MapPin size={14} /> {alert.location}
-                    </div>
+                    <div className="fw-bold text-dark">{alert.ba}</div>
+                    <div className="text-muted small">{alert.unit}</div>
                   </td>
                   <td>
-                    <span className={`badge ${alert.severity === 'CRITICAL' ? 'bg-danger' : alert.severity === 'HIGH' ? 'bg-warning text-dark' : 'bg-info'} opacity-75`}>
-                      {alert.severity}
+                    <span className={`badge rounded-pill ${
+                      alert.alert_type === 'SOS_TRIGGER' ? 'bg-danger' : 
+                      alert.alert_type === 'OVERSPEED' ? 'bg-warning text-dark' : 'bg-secondary'
+                    }`}>
+                      {alert.alert_type}
                     </span>
                   </td>
+                  <td className="text-muted small" style={{ maxWidth: '300px' }}>
+                    {alert.details}
+                  </td>
                   <td>
-                    <span className={`small fw-bold ${alert.status === 'Unresolved' ? 'text-danger' : 'text-success'}`}>
-                      {alert.status}
-                    </span>
+                    <span className="badge bg-light text-danger border border-danger-subtle">Unresolved</span>
                   </td>
                   <td className="text-end pe-4">
-                    <button className="btn btn-outline-primary btn-sm me-2">Investigate</button>
-                    <button className="btn btn-light btn-sm"><CheckCircle size={14} /></button>
+                    {/* <button className="btn btn-outline-primary btn-sm me-2">Investigate</button> */}
+                    {/* <button 
+                      className="btn btn-success btn-sm text-white" 
+                      onClick={() => resolveAlert(alert.alert_id)}
+                    >
+                      <CheckCircle size={14} />
+                    </button> */}
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan="6" className="text-center py-5 text-muted">No active violations detected. System clear.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
